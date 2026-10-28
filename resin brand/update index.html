@@ -1,0 +1,29 @@
+/* Updates index.html in place with the new review panel CSS.
+   Keep this file, index.html and review-panel-style.css in the SAME folder ("resin brand"). */
+const fs = require("fs");
+const path = require("path");
+
+const htmlFile = path.join(__dirname, "index.html");
+const cssFile = path.join(__dirname, "review-panel-style.css");
+
+if (!fs.existsSync(htmlFile) || !fs.existsSync(cssFile)) {
+  console.error("index.html or review-panel-style.css not found in this folder.");
+  process.exit(1);
+}
+
+const html = fs.readFileSync(htmlFile, "utf8");
+const css = fs.readFileSync(cssFile, "utf8").trim();
+
+const START = "/* ===== CUSTOMER REVIEWS - RIGHT SIDE PANEL ===== */";
+const END = "/* ===== NEW LAYOUT ===== */";
+const s = html.indexOf(START);
+const e = html.indexOf(END);
+
+if (s < 0 || e < 0 || e < s) {
+  console.error("Could not find the review panel CSS block in index.html. Nothing changed.");
+  process.exit(1);
+}
+
+fs.writeFileSync(htmlFile + ".bak", html);   // backup of the old file
+fs.writeFileSync(htmlFile, html.slice(0, s) + css + "\n\n        " + html.slice(e));
+console.log("Done! index.html updated. Old copy saved as index.html.bak");

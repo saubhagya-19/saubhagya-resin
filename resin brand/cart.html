@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Shopping Cart - Resin Brand</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #f8f9fa; color: #222; margin: 0; padding: 20px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 34px; margin: 0 0 20px; }
+  h2 { font-size: 22px; margin: 30px 0 14px; }
+
+  .user-bar { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #555; margin-bottom: 14px; }
+  .user-bar button { border: 0; background: none; color: #b00020; cursor: pointer; text-decoration: underline; font-size: 14px; }
+
+  .item { display: flex; align-items: center; gap: 16px; padding: 20px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+  .item img { width: 88px; height: 88px; object-fit: cover; border-radius: 4px; background: #eee; }
+  .item .info { flex: 1; }
+  .item .info b { font-size: 19px; display: block; }
+  .item .info small { color: #666; font-size: 15px; }
+  .item .info small s { color: #999; margin-left: 6px; }
+  .item .info .off { color: #e91e63; font-weight: bold; font-size: 13px; margin-left: 6px; }
+  .qty { display: flex; align-items: center; gap: 14px; }
+  .qty button { width: 32px; height: 32px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 16px; }
+  .line-price { color: #1a8a1a; font-weight: bold; font-size: 20px; min-width: 90px; text-align: right; }
+  .remove { color: #b00020; cursor: pointer; text-decoration: underline; background: none; border: 0; font-size: 16px; }
+  .empty { padding: 30px 0; color: #666; }
+  .sync-note { display: none; background: #fff8e6; border: 1px solid #f0d58a; border-radius: 8px; padding: 10px 14px; font-size: 14px; margin: 0 0 14px; }
+
+  .totals { width: 100%; max-width: 400px; margin: 24px 0 0 auto; font-size: 17px; }
+  .totals div { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .totals .disc { color: #1a8a1a; display: none; }
+  .totals .grand { border-top: 1px solid #ccc; padding-top: 12px; margin-top: 10px; font-size: 26px; font-weight: bold; }
+
+  .form { max-width: 440px; }
+  .form input, .form textarea { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; margin-bottom: 12px; background: #fff; font-family: inherit; }
+  .form input:focus, .form textarea:focus { outline: 2px solid #000; }
+  .row { display: flex; gap: 12px; }
+
+  .coupon-row { display: flex; gap: 8px; }
+  .coupon-row input { text-transform: uppercase; margin-bottom: 0; }
+  .coupon-btn { padding: 0 20px; border: 0; border-radius: 6px; background: #000; color: #fff; font-weight: bold; cursor: pointer; }
+  .coupon-btn:hover { background: #f5b400; color: #000; }
+  .coupon-msg { font-size: 13px; margin: 6px 0 14px; min-height: 16px; }
+  .coupon-msg.ok { color: #1a8a1a; } .coupon-msg.err { color: #b00020; }
+
+  .order-btn { width: 100%; padding: 15px; background: #25D366; color: #fff; border: 0; border-radius: 6px; font-size: 17px; font-weight: bold; cursor: pointer; }
+  .order-btn:disabled { background: #9bd9b4; cursor: not-allowed; }
+  .error { color: #b00020; font-size: 14px; margin: 8px 0; min-height: 18px; }
+
+  .continue { display: inline-block; margin: 0 0 18px; padding: 10px 20px; border: 1px solid #222; border-radius: 6px; color: #222; text-decoration: none; font-weight: bold; font-size: 15px; background: #fff; }
+  .continue:hover { background: #222; color: #fff; }
+
+  /* hidden until the login check passes */
+  #app { display: none; }
+  #guest { text-align: center; padding: 60px 20px; }
+  #guest a { display: inline-block; margin-top: 14px; padding: 12px 28px; background: #000; color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold; }
+
+  @media (max-width: 640px) {
+    .item { flex-wrap: wrap; }
+    .item .info { flex-basis: calc(100% - 110px); }
+    .line-price { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Guests only see this (and are sent to the login page straight away) -->
+  <div id="guest">
+    <h1>Please log in</h1>
+    <p>You must be logged in to view your cart and place an order.</p>
+    <a href="#" id="loginLink">Log in to continue</a>
+  </div>
+
+  <!-- Logged-in customers only -->
+  <div id="app">
+    <div class="user-bar">
+      <span id="userLabel"></span>
+      <button type="button" id="logoutBtn">Log out</button>
+    </div>
+
+    <h1>Your Shopping Cart</h1>
+    <a href="index.html" class="continue" id="continueTop">&larr; Continue Shopping</a>
+    <div class="sync-note" id="syncNote"></div>
+    <div id="items"></div>
+
+    <div class="totals">
+      <div><span>Subtotal</span><span id="subTxt">₹0</span></div>
+      <div class="disc" id="discRow"><span id="discLabel">Coupon discount</span><span id="discTxt">- ₹0</span></div>
+      <div><span>Delivery Charges</span><span id="delTxt">₹0</span></div>
+      <div class="grand"><span>Total</span><span id="totalTxt">₹0</span></div>
+    </div>
+
+    <form class="form" id="orderForm" novalidate>
+      <h2>Delivery details</h2>
+      <input type="text" id="name" placeholder="Full name *" required>
+      <input type="tel" id="phone" placeholder="Mobile number (10 digits) *" maxlength="10" required>
+      <input type="text" id="address" placeholder="House no., building, street, area *" required>
+      <input type="text" id="landmark" placeholder="Landmark (optional)">
+      <div class="row">
+        <input type="text" id="city" placeholder="City *" required>
+        <input type="text" id="state" placeholder="State *" required>
+      </div>
+      <input type="text" id="pincode" placeholder="Pincode (6 digits) *" maxlength="6" required>
+      <textarea id="note" rows="3" placeholder="Note for this order (optional)"></textarea>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="Coupon code (optional)" autocomplete="off">
+        <button type="button" class="coupon-btn" id="couponBtn">APPLY</button>
+      </div>
+      <div class="coupon-msg" id="couponMsg"></div>
+
+      <div class="error" id="formError"></div>
+      <button type="submit" class="order-btn" id="orderBtn">Place Order via WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ================= SETTINGS ================= */
+var DELIVERY_CHARGE = 100;               // must match server.js
+var myNumber = "919175171659";           // your WhatsApp number
+var LOGIN_PAGE = "login.html";
+var SHOP_PAGE = "index.html";            // page the "Continue Shopping" button opens
+document.getElementById("continueTop").href = SHOP_PAGE;
+var CART_KEYS = ["cart", "srCart", "cartItems", "sr_cart"];   // where your product pages save the cart
+
+// Open this page at http://localhost:3000/cart.html. If opened as a file, talk to the server directly.
+var API = location.protocol === "file:" ? "http://localhost:3000" : "";
+
+/* ================= LOGIN (mandatory) =================
+   login.html saves: localStorage "sr_session" = {id, token}, "token", "userName" */
+function readJSON(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+
+function getSession() {
+  var s = readJSON("sr_session");
+  var token = (s && s.token) || (function () { try { return localStorage.getItem("token"); } catch (e) { return null; } })();
+  if (!token) return null;
+  try {                                   // check the token has not expired
+    var p = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (p.exp && p.exp * 1000 < Date.now()) return null;
+    return { token: token, name: p.name || localStorage.getItem("userName") || "", phone: p.phone || "" };
+  } catch (e) { return null; }
+}
+function clearSession() {
+  ["sr_session", "token", "userName"].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+}
+function loginUrl(logout) {
+  var back = location.pathname.split("/").pop() + location.search;
+  return LOGIN_PAGE + "?next=" + encodeURIComponent(back || "cart.html") + (logout ? "&logout=1" : "");
+}
+
+var session = getSession();
+if (!session) {
+  clearSession();
+  document.getElementById("loginLink").href = loginUrl();
+  window.location.replace(loginUrl());
+} else {
+  document.getElementById("guest").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("userLabel").textContent = "Logged in as " + (session.name || "your account") + (session.phone ? " (+91 " + session.phone + ")" : "");
+  if (session.name) document.getElementById("name").value = session.name;
+  if (session.phone) document.getElementById("phone").value = session.phone;
+}
+document.getElementById("logoutBtn").addEventListener("click", function () {
+  clearSession();
+  window.location.href = loginUrl(true);
+});
+
+/* ================= CART ================= */
+var cartKey = CART_KEYS[0], cart = [];
+function toNum(v) { var n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isNaN(n) ? 0 : n; }
+function money(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+// photos uploaded from the admin panel are saved as "/uploads/..." on the server
+function imgUrl(p) { return (!p || !API || /^(https?:|data:)/.test(p)) ? p : (p.charAt(0) === "/" ? API + p : p); }
+
+function looksLikeCart(c) {
+  return Array.isArray(c) && c.length && c.every(function (x) { return x && typeof x === "object" && ("price" in x); });
+}
+(function loadCart() {
+  // 1) the usual key names
+  for (var i = 0; i < CART_KEYS.length; i++) {
+    var c = readJSON(CART_KEYS[i]);
+    if (looksLikeCart(c)) { cart = c; cartKey = CART_KEYS[i]; return; }
+  }
+  // 2) otherwise search every saved item for a list of products with prices
+  try {
+    for (var j = 0; j < localStorage.length; j++) {
+      var k = localStorage.key(j);
+      if (k === "sr_users" || k === "sr_session") continue;
+      var d = readJSON(k);
+      if (looksLikeCart(d)) { cart = d; cartKey = k; return; }
+    }
+  } catch (e) {}
+})();
+function saveCart() { try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch (e) {} }
+function qtyOf(it) { return toNum(it.qty || it.quantity || it.count || 1) || 1; }
+function setQty(it, q) {
+  if ("qty" in it) it.qty = q;
+  else if ("quantity" in it) it.quantity = q;
+  else if ("count" in it) it.count = q;
+  else it.qty = q;
+}
+
+var couponCode = "", couponPercent = 0;   // set only after the SERVER accepts the coupon
+
+function render() {
+  var box = document.getElementById("items");
+  if (!cart.length) {
+    box.innerHTML = '<div class="empty">Your cart is empty. <a href="' + SHOP_PAGE + '">Start shopping</a></div>';
+  } else {
+    box.innerHTML = cart.map(function (it, i) {
+      var img = imgUrl(it.image || it.img || it.photo || "");
+      var price = toNum(it.price), mrp = toNum(it.mrp);
+      var offer = mrp > price ? '<s>' + money(mrp) + '</s><span class="off">' + Math.round((mrp - price) * 100 / mrp) + '% off</span>' : '';
+      return '<div class="item">' +
+        (img ? '<img src="' + esc(img) + '" alt="">' : '<img alt="">') +
+        '<div class="info"><b>' + esc(it.name || it.title || "Item") + '</b><small>' + money(price) + ' each' + offer + '</small></div>' +
+        '<div class="qty"><button type="button" data-a="minus" data-i="' + i + '">-</button><span>' + qtyOf(it) +
+        '</span><button type="button" data-a="plus" data-i="' + i + '">+</button></div>' +
+        '<div class="line-price">' + money(price * qtyOf(it)) + '</div>' +
+        '<button type="button" class="remove" data-a="remove" data-i="' + i + '">Remove</button></div>';
+    }).join("");
+  }
+  totals();
+}
+function totals() {
+  var sub = cart.reduce(function (s, it) { return s + toNum(it.price) * qtyOf(it); }, 0);
+  var disc = couponPercent ? Math.round(sub * couponPercent / 100) : 0;
+  var del = sub > 0 ? DELIVERY_CHARGE : 0;
+  document.getElementById("subTxt").textContent = money(sub);
+  document.getElementById("discLabel").textContent = "Coupon discount (" + couponPercent + "%)";
+  document.getElementById("discTxt").textContent = "- " + money(disc);
+  document.getElementById("discRow").style.display = couponPercent ? "flex" : "none";
+  document.getElementById("delTxt").textContent = money(del);
+  document.getElementById("totalTxt").textContent = money(sub - disc + del);
+  document.getElementById("orderBtn").disabled = !cart.length;
+  return { sub: sub, disc: disc, del: del, total: sub - disc + del };
+}
+document.getElementById("items").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-a]"); if (!b) return;
+  var i = +b.getAttribute("data-i"), it = cart[i], a = b.getAttribute("data-a");
+  if (a === "plus") setQty(it, qtyOf(it) + 1);
+  if (a === "minus" && qtyOf(it) > 1) setQty(it, qtyOf(it) - 1);
+  if (a === "remove") cart.splice(i, 1);
+  saveCart(); render();
+});
+
+/* ================= KEEP CART PRICES IN SYNC WITH THE SERVER =================
+   The admin can change a price or discount at any time. On opening the cart we fetch the current
+   prices, so the customer sees (and pays) the same price the server will use. */
+function syncPrices() {
+  if (!cart.length) return;
+  fetch(API + "/api/products")
+    .then(function (r) { return r.json(); })
+    .then(function (list) {
+      if (!Array.isArray(list)) return;
+      var byName = {};
+      list.forEach(function (p) { byName[String(p.name).toLowerCase()] = p; });
+      var changed = [];
+      cart.forEach(function (it) {
+        var p = byName[String(it.name || it.title || "").toLowerCase()];
+        if (!p) return;
+        var np = Number(p.final_price);
+        if (toNum(it.price) !== np) { changed.push(it.name || it.title); it.price = np; }
+        if (Number(p.discount) > 0) it.mrp = p.price; else delete it.mrp;
+        if (!(it.image || it.img || it.photo) && p.image) it.image = p.image;
+      });
+      saveCart(); render();
+      if (changed.length) {
+        var n = document.getElementById("syncNote");
+        n.textContent = "Price updated for: " + changed.join(", ") + ".";
+        n.style.display = "block";
+      }
+    })
+    .catch(function () {});     // server not reachable: keep showing the saved prices
+}
+
+/* ================= COUPON (checked by the server) ================= */
+function setMsg(t, ok) { var m = document.getElementById("couponMsg"); m.textContent = t; m.className = "coupon-msg " + (ok ? "ok" : "err"); }
+function resetCoupon() { couponCode = ""; couponPercent = 0; }
+
+document.getElementById("couponBtn").addEventListener("click", function () {
+  var code = document.getElementById("couponInput").value.trim();
+  if (!code) { setMsg("Please enter a coupon code.", false); return; }
+  fetch(API + "/api/coupon", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: code })
+  }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (r) {
+      if (r.ok) { couponCode = code.toUpperCase(); couponPercent = r.d.percent; setMsg("Coupon applied! You get " + couponPercent + "% off.", true); }
+      else { resetCoupon(); setMsg(r.d.error || "Invalid or expired coupon.", false); }
+      totals();
+    })
+    .catch(function () { resetCoupon(); setMsg('Cannot reach the server. Run "node server.js" first.', false); totals(); });
+});
+document.getElementById("couponInput").addEventListener("input", function () {
+  if (couponCode && this.value.trim().toUpperCase() !== couponCode) { resetCoupon(); setMsg("", true); totals(); }
+});
+
+/* ================= PLACE ORDER (saved on the server, login required) ================= */
+document.getElementById("orderForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var s = getSession();
+  if (!s) { clearSession(); window.location.href = loginUrl(); return; }
+
+  var err = document.getElementById("formError"); err.textContent = "";
+  var v = function (id) { return document.getElementById(id).value.trim(); };
+  if (!cart.length) { err.textContent = "Your cart is empty."; return; }
+  if (!v("name") || !v("address") || !v("city") || !v("state")) { err.textContent = "Please fill all required fields."; return; }
+  if (!/^\d{10}$/.test(v("phone"))) { err.textContent = "Enter a valid 10-digit mobile number."; return; }
+  if (!/^\d{6}$/.test(v("pincode"))) { err.textContent = "Enter a valid 6-digit pincode."; return; }
+
+  var btn = document.getElementById("orderBtn");
+  btn.disabled = true; btn.textContent = "Placing order...";
+
+  var fullAddress = v("address") + (v("landmark") ? ", " + v("landmark") : "") + ", " + v("city") + ", " + v("state");
+  var items = cart.map(function (it) { return { name: it.name || it.title || "Item", price: toNum(it.price), qty: qtyOf(it) }; });
+
+  fetch(API + "/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + s.token },
+    body: JSON.stringify({ name: v("name"), phone: v("phone"), address: fullAddress, pincode: v("pincode"), items: items, coupon: couponCode })
+  }).then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+    .then(function (r) {
+      if (r.status === 401) { clearSession(); window.location.href = loginUrl(); return; }
+      if (r.status !== 200) {
+        if (r.status === 409 && Array.isArray(r.d.updated)) {     // prices changed on the server: show the new prices
+          r.d.updated.forEach(function (u) { cart.forEach(function (it) { if ((it.name || it.title) === u.name) it.price = u.price; }); });
+          saveCart(); render();
+        }
+        err.textContent = r.d.error || "Could not place the order.";
+        btn.disabled = false; btn.textContent = "Place Order via WhatsApp"; return;
+      }
+
+      var o = r.d;
+      var sent = o.items || items;      // the items with the prices the server used
+      var lines = sent.map(function (it) { return "- " + it.name + " x" + it.qty + " = " + money(it.price * it.qty); });
+      var msg = "Hello, I placed order #" + o.orderId + ":\n" + lines.join("\n") +
+        "\n\nName: " + v("name") + "\nPhone: " + v("phone") + "\nAddress: " + fullAddress + "\nPincode: " + v("pincode") +
+        (v("note") ? "\nNote: " + v("note") : "") +
+        "\n\nSubtotal: " + money(o.subtotal) +
+        (o.discount ? "\nCoupon " + couponCode + ": -" + money(o.discount) : "") +
+        "\nDelivery: " + money(o.delivery) + "\nTotal: " + money(o.total);
+
+      try { localStorage.removeItem(cartKey); } catch (x) {}   // order is saved, empty the cart
+      window.location.href = "https://wa.me/" + myNumber + "?text=" + encodeURIComponent(msg);
+    })
+    .catch(function () {
+      err.textContent = 'Cannot reach the server. Run "node server.js" and open this page at http://localhost:3000/';
+      btn.disabled = false; btn.textContent = "Place Order via WhatsApp";
+    });
+});
+
+render();
+syncPrices();
+</script>
+</body>
+</html>

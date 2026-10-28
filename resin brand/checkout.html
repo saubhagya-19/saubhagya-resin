@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Address - Resin Brand</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: 40px auto; background: #f9f9f9; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .whatsapp-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+        /* ===== LOGIN GATE ===== */
+        .login-gate { display: none; text-align: center; }
+        .login-gate p { margin: 0 0 18px; color: #444; font-size: 15px; }
+        .login-gate a { display: block; padding: 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold; }
+        .login-gate a:hover { background: #f5b400; color: #000; }
+        .user-bar { display: none; justify-content: space-between; align-items: center; font-size: 13px; color: #555; margin-bottom: 15px; }
+        .user-bar button { border: 0; background: none; color: #d33; cursor: pointer; font-size: 13px; text-decoration: underline; }
+
+        /* ===== COUPON + AMOUNT SUMMARY ===== */
+        .coupon-row { display: flex; gap: 8px; }
+        .coupon-row input { text-transform: uppercase; }
+        .coupon-btn { padding: 0 18px; border: 0; border-radius: 4px; background: #000; color: #fff; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .coupon-btn:hover { background: #f5b400; color: #000; }
+        .coupon-msg { font-size: 13px; margin-top: 6px; min-height: 16px; }
+        .coupon-msg.ok { color: #1a8a3c; }
+        .coupon-msg.err { color: #d33; }
+        .summary { background: #fff7dc; border: 1px solid #f5b400; border-radius: 8px; padding: 14px; margin-bottom: 15px; font-size: 14px; }
+        .summary div { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .summary .discount { color: #1a8a3c; display: none; }
+        .summary .final { border-top: 1px dashed #c9a227; padding-top: 8px; margin: 8px 0 0; font-size: 17px; font-weight: bold; }
+        .summary .note { display: block; font-size: 12px; color: #a66; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Shipping Address</h2>
+
+        <!-- Shown when the customer is NOT logged in -->
+        <div class="login-gate" id="loginGate">
+            <p>Please log in to continue to checkout.</p>
+            <a href="#" id="loginLink">Log in to continue</a>
+        </div>
+
+        <!-- Shown only when the customer IS logged in -->
+        <div class="user-bar" id="userBar">
+            <span id="userLabel">Logged in</span>
+            <button type="button" id="logoutBtn">Log out</button>
+        </div>
+
+        <form id="shippingForm" style="display:none">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="name" placeholder="Enter full name" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+                <label>Full Address</label>
+                <input type="text" id="address" placeholder="House no, street, area" required>
+            </div>
+            <div class="form-group">
+                <label>Pincode</label>
+                <input type="text" id="pincode" placeholder="Enter pincode" required>
+            </div>
+
+            <!-- ORDER AMOUNT + COUPON -->
+            <div class="form-group">
+                <label>Coupon Code (optional)</label>
+                <div class="coupon-row">
+                    <input type="text" id="couponInput" placeholder="Enter coupon code" autocomplete="off">
+                    <button type="button" class="coupon-btn" id="couponBtn">APPLY</button>
+                </div>
+                <div class="coupon-msg" id="couponMsg"></div>
+            </div>
+
+            <div class="summary">
+                <div><span>Order amount</span><span id="subtotalTxt">₹0</span></div>
+                <div class="discount" id="discountRow"><span>Coupon discount (10%)</span><span id="discountTxt">- ₹0</span></div>
+                <div class="final"><span>Final amount</span><span id="finalTxt">₹0</span></div>
+                <span class="note" id="noAmountNote" style="display:none">Order amount not found. Please go back to the cart and try again.</span>
+            </div>
+
+            <button type="submit" class="whatsapp-btn">Place Order via WhatsApp</button>
+        </form>
+    </div>
+
+    <script>
+        /* ---------- SETTINGS ---------- */
+        var COUPON_CODE = "SAUBHAGYA19";   // the valid coupon
+        var COUPON_PERCENT = 10;           // 10% off the final amount
+        var myNumber = "919175171659";     // your WhatsApp number
+
+        /* ---------- LOGIN SETTINGS ----------
+           Checkout requires a logged-in customer.
+           LOGIN_PAGE  : the page where customers log in (it should send them
+                         back here after login using the ?redirect= value).
+           LOGIN_KEYS  : localStorage keys your login page saves the user under.
+                         Add yours here if it is named differently.
+                         The value can be JSON ({name, phone, ...}) or a plain string. */
+        var LOGIN_PAGE = "login.html";
+        var LOGIN_KEYS = ["user", "srUser", "loggedInUser", "currentUser", "sr_user"];
+        var LOGOUT_KEYS = LOGIN_KEYS.concat(["isLoggedIn"]);
+
+        function getLoggedInUser() {
+            for (var i = 0; i < LOGIN_KEYS.length; i++) {
+                var raw = null;
+                try { raw = localStorage.getItem(LOGIN_KEYS[i]); } catch (e) {}
+                if (!raw || raw === "null" || raw === "false") continue;
+                try {
+                    var obj = JSON.parse(raw);
+                    if (obj && typeof obj === "object") return obj;
+                    if (obj) return { name: String(obj) };
+                } catch (e) {
+                    return { name: raw };
+                }
+            }
+            return null;
+        }
+
+        function loginUrl() {
+            var back = location.pathname.split("/").pop() + location.search;
+            return LOGIN_PAGE + "?redirect=" + encodeURIComponent(back || "shipping.html");
+        }
+
+        var currentUser = getLoggedInUser();
+        var form = document.getElementById("shippingForm");
+
+        if (!currentUser) {
+            // Not logged in: hide checkout, send to login
+            document.getElementById("loginGate").style.display = "block";
+            document.getElementById("loginLink").href = loginUrl();
+            window.location.replace(loginUrl());
+        } else {
+            form.style.display = "block";
+            var bar = document.getElementById("userBar");
+            bar.style.display = "flex";
+            var who = currentUser.name || currentUser.phone || currentUser.email || "your account";
+            document.getElementById("userLabel").textContent = "Logged in as " + who;
+            // pre-fill details we already know
+            if (currentUser.name) document.getElementById("name").value = currentUser.name;
+            if (currentUser.phone) document.getElementById("phone").value = currentUser.phone;
+        }
+
+        document.getElementById("logoutBtn").addEventListener("click", function () {
+            LOGOUT_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+            window.location.href = loginUrl();
+        });
+
+        /* ---------- GET THE ORDER AMOUNT ----------
+           Reads the cart that cart.html saved in the browser (localStorage).
+           If your cart uses a different key name, add it to CART_KEYS.
+           You can also open this page as shipping.html?total=1500 */
+        var CART_KEYS = ["cart", "srCart", "cartItems", "sr_cart"];
+
+        function toNum(v) {
+            var n = parseFloat(String(v).replace(/[^0-9.]/g, ""));
+            return isNaN(n) ? 0 : n;
+        }
+
+        function getOrderTotal() {
+            var fromUrl = toNum(new URLSearchParams(location.search).get("total"));
+            if (fromUrl > 0) return fromUrl;
+
+            for (var k = 0; k < CART_KEYS.length; k++) {
+                try {
+                    var cart = JSON.parse(localStorage.getItem(CART_KEYS[k]));
+                    if (Array.isArray(cart) && cart.length) {
+                        var sum = 0;
+                        cart.forEach(function (it) {
+                            var qty = toNum(it.qty || it.quantity || 1) || 1;
+                            sum += toNum(it.price) * qty;
+                        });
+                        if (sum > 0) return sum;
+                    }
+                } catch (e) {}
+            }
+            return 0;
+        }
+
+        /* ---------- COUPON LOGIC ---------- */
+        var subtotal = getOrderTotal();
+        var couponApplied = false;
+        var discount = 0;
+
+        function money(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+
+        function updateSummary() {
+            discount = couponApplied ? Math.round(subtotal * COUPON_PERCENT / 100) : 0;
+            document.getElementById("subtotalTxt").textContent = money(subtotal);
+            document.getElementById("discountTxt").textContent = "- " + money(discount);
+            document.getElementById("discountRow").style.display = couponApplied ? "flex" : "none";
+            document.getElementById("finalTxt").textContent = money(subtotal - discount);
+            document.getElementById("noAmountNote").style.display = subtotal > 0 ? "none" : "block";
+        }
+
+        function setMsg(text, ok) {
+            var m = document.getElementById("couponMsg");
+            m.textContent = text;
+            m.className = "coupon-msg " + (ok ? "ok" : "err");
+        }
+
+        document.getElementById("couponBtn").addEventListener("click", function () {
+            var code = document.getElementById("couponInput").value.trim().toUpperCase();
+            if (!code) { setMsg("Please enter a coupon code.", false); return; }
+            if (code === COUPON_CODE) {
+                couponApplied = true;
+                setMsg("Coupon applied! You get " + COUPON_PERCENT + "% off.", true);
+            } else {
+                couponApplied = false;
+                setMsg("Invalid coupon code.", false);
+            }
+            updateSummary();
+        });
+
+        // if the customer edits the code after applying, remove the discount
+        document.getElementById("couponInput").addEventListener("input", function () {
+            if (couponApplied && this.value.trim().toUpperCase() !== COUPON_CODE) {
+                couponApplied = false;
+                setMsg("", true);
+                updateSummary();
+            }
+        });
+
+        updateSummary();
+
+        /* ---------- SEND ORDER TO WHATSAPP ---------- */
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // re-check login at the moment of checkout
+            if (!getLoggedInUser()) {
+                window.location.href = loginUrl();
+                return;
+            }
+
+            var name = document.getElementById("name").value;
+            var phone = document.getElementById("phone").value;
+            var address = document.getElementById("address").value;
+            var pincode = document.getElementById("pincode").value;
+
+            var text = "Hello, I want to place an order:%0A" +
+                       "*Name:* " + encodeURIComponent(name) + "%0A" +
+                       "*Phone:* " + encodeURIComponent(phone) + "%0A" +
+                       "*Address:* " + encodeURIComponent(address) + "%0A" +
+                       "*Pincode:* " + encodeURIComponent(pincode) + "%0A" +
+                       "*Order amount:* " + encodeURIComponent(money(subtotal));
+
+            if (couponApplied) {
+                text += "%0A*Coupon:* " + encodeURIComponent(COUPON_CODE + " (" + COUPON_PERCENT + "% off)") +
+                        "%0A*Discount:* " + encodeURIComponent("- " + money(discount));
+            }
+            text += "%0A*Final amount:* " + encodeURIComponent(money(subtotal - discount));
+
+            window.location.href = "https://wa.me/" + myNumber + "?text=" + text;
+        });
+    </script>
+
+</body>
+</html>

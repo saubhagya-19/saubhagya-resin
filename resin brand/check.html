@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login check</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:640px;margin:30px auto;padding:0 16px;color:#222}
+.row{padding:10px 12px;margin:8px 0;border-radius:8px;background:#f3f4f6}
+.ok{background:#e6f6ec}.bad{background:#fdeaea}
+button{padding:10px 16px;margin:6px 6px 0 0;border:0;border-radius:6px;background:#222;color:#fff;cursor:pointer}
+code{background:#eee;padding:1px 5px;border-radius:4px}
+</style></head><body>
+<h2>Login check</h2>
+<p>Open this page from the <b>same address</b> you use for login.html and your shop page.</p>
+<div id="out"></div>
+<button onclick="location.reload()">Refresh</button>
+<button onclick="clearSession()">Clear login session</button>
+<button onclick="clearAll()">Delete ALL saved accounts</button>
+<script>
+function row(ok,t){var d=document.createElement('div');d.className='row '+(ok?'ok':'bad');d.innerHTML=(ok?'✅ ':'❌ ')+t;document.getElementById('out').appendChild(d)}
+function info(t){var d=document.createElement('div');d.className='row';d.innerHTML='ℹ️ '+t;document.getElementById('out').appendChild(d)}
+var storage=true;try{localStorage.setItem('t','1');localStorage.removeItem('t')}catch(e){storage=false}
+info('Address you are using: <code>'+location.href+'</code>');
+info('Protocol: <code>'+location.protocol+'</code>'+(location.protocol==='file:'?' (opened straight from a folder. If login fails, use Live Server instead.)':''));
+row(storage,storage?'Browser can save data.':'Browser is BLOCKING saved data. Login cannot work here. Use Live Server or your real website.');
+if(storage){
+  var users=[],s=null;
+  try{users=JSON.parse(localStorage.getItem('sr_users')||'[]')}catch(e){}
+  try{s=JSON.parse(localStorage.getItem('sr_session')||'null')}catch(e){}
+  row(users.length>0,users.length+' account(s) saved at this address'+(users.length?': '+users.map(function(u){return u.email}).join(', '):'. Go to the login page and Sign Up here first.'));
+  var me=s&&users.find(function(u){return u.id===s.id});
+  row(!!me,me?'Logged in as <b>'+me.name+'</b> ('+me.email+')':'Not logged in right now.');
+}
+function clearSession(){localStorage.removeItem('sr_session');location.reload()}
+function clearAll(){if(confirm('Delete all saved accounts at this address?')){localStorage.removeItem('sr_users');localStorage.removeItem('sr_session');location.reload()}}
+</script></body></html>

@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Studio - Saubhagya Resin</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Pacifico&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Montserrat',sans-serif}
+:root{--y:#f5b400;--ink:#0d1b2a;--line:#e6e9ee}
+body{background:#eef1f5;color:#222;min-height:100vh;padding-bottom:84px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#000;color:#fff;font-size:14px}
+.top a{color:#fff;text-decoration:none;font-weight:600}.top b{color:var(--y);font-size:16px}
+.app{display:grid;grid-template-columns:78px 330px 1fr;height:calc(100vh - 44px - 74px);min-height:560px}
+.rail{background:var(--ink);display:flex;flex-direction:column;gap:4px;padding:10px 6px;overflow-y:auto}
+.rail button{background:none;border:0;color:#9fb3c8;padding:10px 2px;border-radius:10px;cursor:pointer;font-size:10px;font-weight:600}
+.rail button span{display:block;font-size:22px;margin-bottom:2px}
+.rail button.on{background:#1b2f45;color:#fff}.rail button:hover{color:#fff}
+.panel{background:#fff;padding:18px;overflow-y:auto;border-right:1px solid var(--line)}
+.tab{display:none}.tab.on{display:block}
+.panel h3{font-size:16px;margin-bottom:4px}.hint{font-size:11.5px;color:#7b8794;margin:4px 0 12px;line-height:1.5}
+label{font-size:12px;font-weight:600;color:#555;display:block;margin:10px 0 5px}
+select,input[type=text],input[type=number],input[type=file],textarea{width:100%;padding:10px;border:1px solid #d5dbe3;border-radius:8px;font-size:13px}
+textarea{resize:vertical;min-height:110px;line-height:1.5}
+.btn{border:0;border-radius:8px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;background:#000;color:#fff}
+.btn:hover{background:var(--y);color:#000}.btn.full{width:100%;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{border:1px solid #d5dbe3;background:#fff;border-radius:50px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:#333}
+.chip:hover{border-color:var(--y)}.chip.on{background:#000;color:#fff;border-color:#000}
+.mat{border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;font-size:10.5px;font-weight:600;background:#fafbfc}
+.mat:hover{border-color:var(--y);transform:translateY(-2px)}
+.mat img{width:100%;height:58px;object-fit:contain;margin-bottom:4px}
+/* ---------- fixed market-size mould list ---------- */
+.shape-list{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.shape-item{border:1px solid var(--line);border-radius:12px;padding:10px 11px;background:#fff}
+.shape-item.on{border-color:#e91e63;box-shadow:0 0 0 2px rgba(233,30,99,.10);background:#fff8fb}
+.shape-title{font-size:12px;font-weight:800;color:#222;line-height:1.35;margin-bottom:7px}
+.shape-title .num{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:50%;background:#f2f3f5;margin-right:5px;font-size:11px}
+.size-options{display:flex;gap:6px;flex-wrap:wrap}
+.size-option{border:1px solid #d8dbe0;background:#f7f8fa;border-radius:8px;padding:6px 9px;font-size:10.5px;font-weight:800;cursor:pointer;color:#333}
+.size-option:hover{border-color:#e91e63}
+.size-option.on{border-color:#e91e63;background:#e91e63;color:#fff}
+.shape-rate{margin-top:6px;font-size:10px;color:#666}
+.shape-resin{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:8px;background:#fff1a8;color:#6b5000;font-size:9.5px;font-weight:800}
+.shape-fixed-note{margin:10px 0 0;padding:9px 10px;border-radius:10px;background:#f7f8fa;border:1px solid var(--line);font-size:10.5px;color:#5f6b78;line-height:1.45}
+.shape-fixed-note b{color:#111}
+#shape{display:none}
+
+.sw{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.s{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border-radius:10px;border:2px solid transparent;cursor:pointer;font-size:9.5px;text-align:center;color:#555}
+.s i{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.s.on{border-color:#000;background:#f3f5f8}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;font-size:12.5px}
+.row label{margin:0;display:flex;gap:8px;align-items:center;font-weight:500;color:#222}
+.tag{background:#e9f7e4;color:#2a8703;border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:700}
+.bd .l{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#555;border-bottom:1px dashed var(--line)}
+.bd .t{font-weight:800;font-size:17px;color:#000;border:0}
+.refs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.ref{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;aspect-ratio:1}
+.ref img{width:100%;height:100%;object-fit:cover;display:block}
+.ref button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;font-size:12px;line-height:1}
+.ref button:hover{background:#e91e63}
+.cnt{font-size:11px;color:#7b8794;text-align:right;margin-top:3px}
+.aiout{margin-top:12px;font-size:13px;line-height:1.5;color:#333;background:#fff8e1;border:1px solid #f5d77a;border-radius:10px;padding:10px 12px;display:none}
+.imgout{display:none;margin-top:12px;text-align:center}
+.imgout img{width:100%;max-width:240px;border-radius:12px;border:1px solid var(--line);background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/16px 16px}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;overflow:auto;background:radial-gradient(#d3d9e2 1px,transparent 1px) 0 0/18px 18px,#eef1f5}
+.tools{display:flex;flex-wrap:wrap;gap:6px;background:#fff;padding:7px 10px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);align-items:center}
+.tools button{background:#f3f5f8;border:0;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:600}
+.tools button:hover{background:var(--y)}.tools .d:hover{background:#fdd}
+.tools input[type=range]{width:80px}
+.cwrap{box-shadow:0 10px 30px rgba(0,0,0,.18);border-radius:14px;overflow:hidden;background:#fff}
+.buy{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 20px;z-index:50;flex-wrap:wrap}
+.buy .p small{display:block;font-size:11px;color:#777}.buy .p b{font-size:22px}
+.buy .a{display:flex;gap:8px;flex-wrap:wrap}
+.wa{background:#25D366}.pk{background:#e91e63}
+#toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.show{opacity:1}
+@media(max-width:900px){.app{grid-template-columns:62px 1fr;height:auto}.stage{grid-column:1/-1}.panel{max-height:340px}}
+
+/* =========================================
+   PREMIUM SHAPE & SIZE SECTION
+   ========================================= */
+
+#tab-shape{
+  padding:4px 2px 20px;
+}
+
+#tab-shape h3{
+  font-size:20px;
+  font-weight:800;
+  color:#111827;
+  margin-bottom:5px;
+}
+
+#tab-shape > .hint{
+  font-size:11.5px;
+  line-height:1.6;
+  color:#7b8794;
+  background:#f8fafc;
+  border-left:3px solid #f5b400;
+  padding:9px 11px;
+  border-radius:8px;
+  margin-bottom:16px;
+}
+
+#tab-shape > label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  color:#6b7280;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.shape-list{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  margin-top:8px;
+}
+
+.shape-list::before{
+  content:"✨ CHOOSE YOUR MOULD";
+  display:block;
+  font-size:10px;
+  font-weight:800;
+  color:#9ca3af;
+  letter-spacing:.7px;
+  margin:0 0 1px 2px;
+}
+
+.shape-item{
+  position:relative;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:13px 13px 12px;
+  background:linear-gradient(145deg,#ffffff,#f8fafc);
+  box-shadow:0 3px 12px rgba(15,23,42,.045);
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  overflow:hidden;
+}
+
+.shape-item::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+  background:linear-gradient(180deg,#f5b400,#ffd95a);
+  opacity:0;
+  transition:.2s;
+}
+
+.shape-item:hover{
+  transform:translateY(-2px);
+  border-color:#f2c84b;
+  box-shadow:0 8px 22px rgba(15,23,42,.10);
+}
+
+.shape-item.on{
+  border-color:#f5b400;
+  background:linear-gradient(145deg,#fffdf5,#fff8df);
+  box-shadow:0 7px 22px rgba(245,180,0,.14),0 0 0 1px rgba(245,180,0,.15);
+}
+
+.shape-item.on::before{
+  opacity:1;
+}
+
+.shape-title{
+  display:flex;
+  align-items:center;
+  font-size:13px;
+  font-weight:800;
+  color:#111827;
+  line-height:1.35;
+  margin-bottom:10px;
+}
+
+.shape-title .num{
+  flex:none;
+  width:27px;
+  height:27px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  margin-right:8px;
+  background:#f1f3f5;
+  color:#374151;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:inset 0 0 0 1px #e5e7eb;
+}
+
+.shape-item.on .shape-title .num{
+  background:#111827;
+  color:#ffd54a;
+  box-shadow:none;
+}
+
+.size-options{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:9px;
+}
+
+.size-option{
+  border:1px solid #d8dee7;
+  background:#fff;
+  border-radius:9px;
+  padding:7px 11px;
+  font-size:10.5px;
+  font-weight:800;
+  color:#374151;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+
+.size-option:hover{
+  border-color:#f5b400;
+  color:#111827;
+  background:#fffdf4;
+  transform:translateY(-1px);
+}
+
+.size-option.on{
+  border-color:#111827;
+  background:#111827;
+  color:#fff;
+  box-shadow:0 3px 8px rgba(0,0,0,.16);
+}
+
+.shape-rate{
+  margin-top:4px;
+  font-size:10.5px;
+  color:#6b7280;
+  font-weight:600;
+}
+
+.shape-resin{
+  display:inline-flex;
+  align-items:center;
+  margin-top:7px;
+  padding:5px 9px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#fff3b0,#ffe36a);
+  color:#684d00;
+  font-size:9.5px;
+  font-weight:900;
+  letter-spacing:.1px;
+  box-shadow:inset 0 0 0 1px rgba(180,130,0,.12);
+}
+
+.shape-fixed-note{
+  position:relative;
+  margin:14px 0 0;
+  padding:12px 42px 12px 13px;
+  border:1px solid #ead58a;
+  border-radius:14px;
+  background:linear-gradient(135deg,#fffdf2,#fff8d7);
+  color:#6b7280;
+  font-size:10.5px;
+  line-height:1.55;
+  box-shadow:0 4px 12px rgba(245,180,0,.08);
+}
+
+.shape-fixed-note::before{
+  content:"💎";
+  position:absolute;
+  right:11px;
+  top:10px;
+  font-size:18px;
+}
+
+.shape-fixed-note b{
+  color:#111827;
+}
+
+/* Responsive polish */
+@media(max-width:900px){
+  #tab-shape h3{font-size:18px}
+  .shape-item{border-radius:14px}
+}
+
+</style>
+</head>
+<body>
+<div class="top"><a href="index.html">← Back to shop</a><b>Saubhagya Design Studio</b><a href="cart.html">🛒 Cart (<span id="cartCount">0</span>)</a></div>
+
+<div class="app">
+  <nav class="rail" id="rail">
+    <button class="on" data-t="shape"><span>◧</span>Shape</button>
+    <button data-t="ai"><span>✨</span>AI Design</button>
+    <button data-t="colors"><span>🎨</span>Colours</button>
+    <button data-t="mats"><span>🌸</span>Materials</button>
+    <button data-t="stick"><span>⭐</span>Stickers</button>
+    <button data-t="text"><span>Aa</span>Text</button>
+    <button data-t="photos"><span>🖼️</span>Photos</button>
+    <button data-t="ideas"><span>💭</span>Ideas</button>
+    <button data-t="pack"><span>📦</span>Packing</button>
+    <button data-t="extras"><span>🎁</span>Extras</button>
+    <button data-t="price"><span>₹</span>Price</button>
+  </nav>
+
+  <aside class="panel">
+    <div class="tab on" id="tab-shape">
+      <div class="shape-heading">
+        <h3>✨ Shape &amp; Size</h3>
+        <p class="hint">Choose your favourite mould and size to start creating your custom piece.</p>
+      </div>
+
+      <label>Mould</label>
+
+      <!-- Hidden select is kept for the existing pricing, AI and canvas logic. -->
+      <select id="shape" aria-hidden="true" tabindex="-1">
+        <option value="circle" data-rate="120">Coaster (₹120 per inch)</option>
+        <option value="tlight" data-rate="110">T-Light Holder (₹110 per inch)</option>
+        <option value="rectangle" data-rate="150">Rectangular Frame / Plaque (₹150 per inch)</option>
+        <option value="heart" data-rate="140">Heart Mould (₹140 per inch)</option>
+        <option value="clock" data-rate="180">Wall Clock (₹180 per inch)</option>
+        <option value="thali" data-rate="200">Pooja Thali (₹200 per inch)</option>
+      </select>
+
+      <div class="shape-list" id="shapeCards">
+        <div class="shape-item on" data-shape="circle">
+          <div class="shape-title"><span class="num">1</span>Coaster </div>
+          <div class="size-options"><button type="button" class="size-option on" data-shape="circle" data-size="4">4 inch</button></div>
+          <div class="shape-rate">Mould ₹120 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+
+        <div class="shape-item" data-shape="tlight">
+          <div class="shape-title"><span class="num">2</span>T-Light Holder</div>
+          <div class="size-options"><button type="button" class="size-option" data-shape="tlight" data-size="4">4 inch</button></div>
+          <div class="shape-rate">Mould ₹110 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+
+        <div class="shape-item" data-shape="rectangle">
+          <div class="shape-title"><span class="num">3</span>Rectangular Frame / Plaque</div>
+          <div class="size-options"><button type="button" class="size-option" data-shape="rectangle" data-size="4">4 inch</button></div>
+          <div class="shape-rate">Mould ₹150 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+
+        <div class="shape-item" data-shape="heart">
+          <div class="shape-title"><span class="num">4</span>Heart Mould</div>
+          <div class="size-options">
+            <button type="button" class="size-option" data-shape="heart" data-size="3">3 inch</button>
+            <button type="button" class="size-option" data-shape="heart" data-size="6">6 inch</button>
+          </div>
+          <div class="shape-rate">Mould ₹140 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+
+        <div class="shape-item" data-shape="clock">
+          <div class="shape-title"><span class="num">5</span>Wall Clock</div>
+          <div class="size-options">
+            <button type="button" class="size-option" data-shape="clock" data-size="8">8 inch</button>
+            <button type="button" class="size-option" data-shape="clock" data-size="10">10 inch</button>
+            <button type="button" class="size-option" data-shape="clock" data-size="12">12 inch</button>
+            <button type="button" class="size-option" data-shape="clock" data-size="14">14 inch</button>
+          </div>
+          <div class="shape-rate">Mould ₹180 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+
+        <div class="shape-item" data-shape="thali">
+          <div class="shape-title"><span class="num">6</span>Pooja Thali</div>
+          <div class="size-options">
+            <button type="button" class="size-option" data-shape="thali" data-size="8">8 inch</button>
+            <button type="button" class="size-option" data-shape="thali" data-size="10">10 inch</button>
+            <button type="button" class="size-option" data-shape="thali" data-size="12">12 inch</button>
+            <button type="button" class="size-option" data-shape="thali" data-size="14">14 inch</button>
+          </div>
+          <div class="shape-rate">Mould ₹200 / inch</div>
+          <span class="shape-resin">Resin ₹30 / inch</span>
+        </div>
+      </div>
+
+      <input type="hidden" id="len" value="4">
+
+      <div class="shape-fixed-note">
+        <b>Resin material: ₹30 per inch.</b> This resin charge is always included in the estimate. Undo/Redo restores the complete price state.
+      </div>
+    </div>
+
+    <div class="tab" id="tab-ai">
+      <h3>✨ AI Designer</h3>
+      <p class="hint">Tell us your idea in your own words (who it is for, the occasion, colours, size, a name to write). We will build a starting design for you. You can then move, resize or change anything. This replaces what is on the canvas, and Undo brings it back.</p>
+      <label for="aiIdea">Your idea</label>
+      <textarea id="aiIdea" maxlength="500" placeholder='e.g. Krishna theme gift for my sister, blue and gold, 6 inch heart, with the name "Anaya"'></textarea>
+      <div class="chips" id="aiEx" style="margin-top:10px"></div>
+      <label for="aiEngine">AI engine</label>
+      <select id="aiEngine">
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+      </select>
+      <button class="btn full" id="aiGo">✨ Create my design</button>
+      <div class="aiout" id="aiOut"></div>
+      <div style="margin-top:22px;border-top:1px dashed var(--line);padding-top:16px">
+        <h3>🎨 AI picture <span class="tag">₹150</span></h3>
+        <p class="hint">Describe any picture and AI will paint it for you, for example "a golden lion wearing a rose crown". You see it first and add it to your design only if you like it. Each picture costs ₹150 and takes about 20 to 40 seconds.</p>
+        <label for="imgIdea">What should the picture show?</label>
+        <textarea id="imgIdea" maxlength="300" style="min-height:80px" placeholder="e.g. a cute elephant holding a lotus, pastel colours"></textarea>
+        <label for="imgStyle">Style</label>
+        <select id="imgStyle"><option value="cartoon">Cute cartoon sticker</option><option value="watercolor">Watercolour</option><option value="realistic">Realistic</option><option value="mandala">Mandala / ornamental</option><option value="line">Line art</option><option value="gold">Gold foil look</option></select>
+        <button class="btn full" id="imgGo">🎨 Generate picture</button>
+        <div class="imgout" id="imgOut"></div>
+      </div>
+
+      <p class="hint" style="margin-top:16px">The price shown is an estimate. We confirm the final design and price with you on WhatsApp before making it.</p>
+    </div>
+
+    <div class="tab" id="tab-colors">
+      <h3>Resin colours <span class="tag" id="tg-color">₹0</span></h3>
+      <p class="hint">₹70 per colour. Pick one, or pick several to blend them across your piece.</p>
+      <div class="sw" id="sw"></div>
+    </div>
+
+    <div class="tab" id="tab-mats">
+      <h3>Raw materials <span class="tag" id="tg-addon">₹0</span></h3>
+      <p class="hint">Tap a material to drop it on your design, then drag, resize or rotate it. Flat ₹70 for any number of materials.</p>
+      <div class="grid" id="matGrid"></div>
+
+      <div id="flowerBox" style="display:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:14px">
+        <h3>Real flowers <span class="tag" id="tg-flower">₹0</span></h3>
+        <p class="hint">Each flower is priced separately (per piece) and is not part of the flat ₹70. Tap a flower to add it, and add as many as you like.</p>
+        <div class="grid" id="flGrid"></div>
+        <p class="hint" style="margin-top:12px">To use your own real flower photos, save them as <b>images/flowers/marigold.png</b>, <b>rose.png</b>, <b>jasmine.png</b>, <b>lavender.png</b>, <b>hibiscus.png</b>, <b>lotus.png</b>, <b>daisy.png</b>, <b>gypsophila.png</b>. Use a transparent background (PNG) for the best look.</p>
+      </div>
+      <p class="hint" style="margin-top:14px">To show your own photos of each material, save them as <b>images/materials/gold-flakes.png</b>, <b>rose-petal.png</b> and so on (names are under each picture). Until then the drawings shown here are used.</p>
+    </div>
+
+    <div class="tab" id="tab-stick">
+      <h3>Stickers <span class="tag" id="tg-sticker">₹0</span></h3>
+      <p class="hint">Cute, festive and devotional stickers, priced per piece. Tap one to add it, then drag, resize or rotate it. Add as many as you like.</p>
+      <div class="chips" id="stCats"></div>
+      <div class="grid" id="stGrid"></div>
+      <p class="hint" style="margin-top:12px">To use your own sticker artwork, save it as <b>images/stickers/krishna-flute.png</b>, <b>rakhi-1.png</b>, <b>baby-feet.png</b> and so on (the names are the ids in the <b>stickers</b> list in this file). Transparent PNG looks best.</p>
+    </div>
+
+    <div class="tab" id="tab-text">
+      <h3>Text <span class="tag" id="tg-text">₹0</span></h3>
+      <p class="hint">₹75 to enable custom text, plus ₹75 for every word.</p>
+      <label for="lang">Language</label>
+      <select id="lang"><option value="">-- Select language --</option><option>English</option><option>Hindi</option><option>Marathi</option><option>Gujarati</option><option>Sanskrit</option></select>
+      <label for="txt">Your text</label><input type="text" id="txt" placeholder="e.g. Ananya &amp; Rohan">
+      <label for="font">Font</label>
+      <select id="font"><option value="Montserrat">Montserrat</option><option value="Playfair Display">Playfair Display (classic)</option><option value="Pacifico">Pacifico (handwritten)</option><option value="Arial">Arial</option></select>
+      <label for="tcol">Text colour</label><input type="color" id="tcol" value="#d4af37" style="width:60px;height:38px;border:0">
+      <button class="btn full" id="addText">+ Add text to design</button>
+    </div>
+
+    <div class="tab" id="tab-photos">
+      <h3>Your photos</h3><p class="hint">Add a photo for frames or keychains. It can be moved and resized on the canvas.</p>
+      <input type="file" id="photo" accept="image/*">
+    </div>
+
+    <div class="tab" id="tab-ideas">
+      <h3>Your ideas &amp; reference</h3>
+      <p class="hint">Tell us anything we should know, and share pictures of designs you like. These are sent to our team with your order and are not placed on the canvas. No extra charge.</p>
+      <label for="note">Your thoughts / special instructions</label>
+      <textarea id="note" maxlength="600" placeholder="e.g. I want a sea-wave look with gold edges, for my parents' anniversary. Delivery needed before 20 Oct."></textarea>
+      <div class="cnt"><span id="noteCnt">0</span>/600</div>
+      <label for="ref">Reference pictures (up to 3)</label>
+      <input type="file" id="ref" accept="image/*" multiple>
+      <div class="refs" id="refs"></div>
+      <p class="hint" style="margin-top:10px">Tip: with Order on WhatsApp, you can also send the reference pictures directly in the chat.</p>
+    </div>
+
+    <div class="tab" id="tab-pack">
+      <h3>Packing theme <span class="tag" id="tg-pack">₹0</span></h3>
+      <p class="hint">Choose how your piece is packed. Great for gifting. Standard packing is free.</p>
+      <div id="packs"></div>
+    </div>
+
+    <div class="tab" id="tab-extras">
+      <h3>Extras from our other products <span class="tag" id="tg-other">₹0</span></h3>
+      <p class="hint" style="margin-bottom:12px">Tick anything you want added to your order.</p>
+      <div id="extras"></div>
+    </div>
+
+    <div class="tab" id="tab-price">
+      <h3>Price details</h3><p class="hint">Updates as you design.</p>
+      <div class="bd">
+        <div class="l"><span>Shape &amp; size</span><span id="b-shape">₹0</span></div>
+        <div class="l"><span>Resin material (₹30/in)</span><span id="b-resin">₹0</span></div>
+        <div class="l"><span>Colours</span><span id="b-color">₹0</span></div>
+        <div class="l"><span>Text &amp; language</span><span id="b-text">₹0</span></div>
+        <div class="l"><span>Raw materials</span><span id="b-addon">₹0</span></div>
+        <div class="l"><span>Real flowers</span><span id="b-flower">₹0</span></div>
+        <div class="l"><span>Stickers</span><span id="b-sticker">₹0</span></div>
+        <div class="l"><span>Packing theme</span><span id="b-pack">₹0</span></div>
+        <div class="l"><span>Extras</span><span id="b-other">₹0</span></div>
+        <div class="l t"><span>Total</span><span id="b-total">₹0</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="stage">
+    <div class="tools">
+      <button id="undo">↩ Undo</button><button id="redo">↪ Redo</button>
+      <button id="dup">⧉ Duplicate</button><button id="flip">⇋ Flip</button>
+      <button id="front">⬆ Front</button><button id="back">⬇ Back</button>
+      <label style="margin:0;display:flex;align-items:center;gap:5px;font-size:11px">Fade <input type="range" id="op" min="20" max="100" value="100"></label>
+      <button class="d" id="del">🗑 Delete</button>
+    </div>
+    <div class="cwrap"><canvas id="c" width="500" height="500"></canvas></div>
+    <p class="hint">Click any item to move, rotate or resize it. Double-click text to edit it. Press Delete to remove.</p>
+  </section>
+</div>
+
+<div class="buy">
+  <div class="p"><small>Estimated total</small><b id="total">₹0</b></div>
+  <div class="a">
+    <button class="btn" id="cart">🛒 Add to cart</button>
+    <button class="btn pk" id="dl">📥 Download preview</button>
+    <button class="btn wa" id="wa">📱 Order on WhatsApp</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const canvas=new fabric.Canvas('c',{preserveObjectStacking:true});
+let base=null,loading=false,hist=[],hi=-1,total=0;
+const labels={circle:'Coaster / Keychain',rectangle:'Rectangular Frame / Plaque',heart:'Heart Mould',clock:'Wall Clock',thali:'Pooja Thali',tlight:'T-Light Holder'};
+const SIZE_OPTIONS={circle:[4],tlight:[4],rectangle:[4],heart:[3,6],clock:[8,10,12,14],thali:[8,10,12,14]};
+const FIXED_SIZES={circle:4,tlight:4,rectangle:4,heart:3,clock:8,thali:8};
+const shapeCards=()=>document.querySelectorAll('.shape-item');
+const sizeButtons=()=>document.querySelectorAll('.size-option');
+function selectFixedShape(shape,size){
+  const allowed=SIZE_OPTIONS[shape]||[4];
+  const chosenSize=allowed.includes(Number(size))?Number(size):allowed[0];
+  $('shape').value=shape;
+  $('len').value=chosenSize;
+  shapeCards().forEach(card=>card.classList.toggle('on',card.dataset.shape===shape));
+  sizeButtons().forEach(btn=>btn.classList.toggle('on',btn.dataset.shape===shape&&Number(btn.dataset.size)===chosenSize));
+  drawBase();
+}
+sizeButtons().forEach(btn=>{
+  btn.addEventListener('click',()=>selectFixedShape(btn.dataset.shape,btn.dataset.size));
+});
+function syncShapeCards(){
+  const shape=$('shape').value;
+  const size=Number($('len').value)||FIXED_SIZES[shape]||4;
+  const allowed=SIZE_OPTIONS[shape]||[4];
+  const validSize=allowed.includes(size)?size:allowed[0];
+  $('len').value=validSize;
+  shapeCards().forEach(card=>card.classList.toggle('on',card.dataset.shape===shape));
+  sizeButtons().forEach(btn=>btn.classList.toggle('on',btn.dataset.shape===shape&&Number(btn.dataset.size)===validSize));
+}
+
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2200)};
+
+/* ---------- tabs ---------- */
+$('rail').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ document.querySelectorAll('.rail button,.tab').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');$('tab-'+b.dataset.t).classList.add('on')});
+
+/* ---------- history (undo / redo) ---------- */
+/*
+  History stores both the canvas AND the pricing controls.
+  This prevents Undo/Redo from changing the displayed price unexpectedly.
+*/
+const KEEP=['isBase','isResinAddOn','isMat','isFlower','flower','fprice','isSticker','sticker','sprice','selectable','evented'];
+
+function historyState(){
+  return {
+    canvas: canvas.toJSON(KEEP),
+    shape: $('shape').value,
+    len: $('len').value,
+    colors: picked.slice(),
+    pack: packSel,
+    extras: Array.from(chosen),
+    text: $('txt').value,
+    lang: $('lang').value,
+    font: $('font').value,
+    tcol: $('tcol').value
+  };
+}
+
+function snap(){
+  if(loading)return;
+  hist=hist.slice(0,hi+1);
+  hist.push(JSON.stringify(historyState()));
+  if(hist.length>40)hist.shift();
+  hi=hist.length-1;
+}
+
+function restore(i){
+  if(!hist[i])return;
+  loading=true;
+  const st=JSON.parse(hist[i]);
+
+  $('shape').value=st.shape||'circle';
+  $('len').value=Number(st.len)||FIXED_SIZES[$('shape').value]||4;
+
+  picked.length=0;
+  (st.colors||[]).forEach(c=>picked.push(c));
+  document.querySelectorAll('#sw .s').forEach((el,idx)=>{
+    el.classList.toggle('on', picked.includes(colors[idx][1]));
+  });
+
+  packSel=st.pack||'standard';
+  document.querySelectorAll('input[name="pack"]').forEach(r=>{
+    r.checked=r.value===packSel;
+  });
+
+  chosen.clear();
+  (st.extras||[]).forEach(id=>chosen.add(id));
+  document.querySelectorAll('#extras input[type="checkbox"]').forEach((cb,idx)=>{
+    cb.checked=chosen.has(extras[idx][0]);
+  });
+
+  $('txt').value=st.text||'';
+  $('lang').value=st.lang||'';
+  $('font').value=st.font||'Playfair Display';
+  $('tcol').value=st.tcol||'#111111';
+  syncShapeCards();
+
+  canvas.loadFromJSON(st.canvas,()=>{
+    base=canvas.getObjects().find(o=>o.isBase)||null;
+    canvas.renderAll();
+    loading=false;
+    recalc();
+  });
+}
+
+$('undo').onclick=()=>{
+  if(hi>0){hi--;restore(hi)}
+  else toast('Nothing to undo');
+};
+
+$('redo').onclick=()=>{
+  if(hi<hist.length-1){hi++;restore(hi)}
+  else toast('Nothing to redo');
+};
+
+canvas.on('object:added',()=>{snap();recalc()});
+canvas.on('object:modified',snap);
+canvas.on('object:removed',()=>{snap();recalc()});
+
+/* ---------- colours ---------- */
+const colors=[['Ocean Blue','#1b6fa8'],['Rose Gold','#b76e79'],['Emerald Green','#0f6b4c'],['Ruby Red','#9b1c31'],['Sapphire Blue','#0f3d73'],['Amber Yellow','#d99a1b'],['Ivory White','#f2ede1'],['Jet Black','#161616'],['Lavender','#8b6fb3'],['Coral Pink','#e8768c'],['Turquoise','#1fa6a0'],['Champagne','#d9c27e'],['Clear','#e9f2f2'],['Pearl White','#f7f5f2'],['Sunset Orange','#d9611b'],['Charcoal','#4a4a4a']];
+const picked=[];
+colors.forEach(([n,h])=>{const d=document.createElement('div');d.className='s';d.innerHTML=`<i style="background:${h}"></i>${n}`;
+ d.onclick=()=>{const k=picked.indexOf(h);if(k>-1){picked.splice(k,1);d.classList.remove('on')}else{picked.push(h);d.classList.add('on')}
+  fillBase();snap();recalc()};$('sw').appendChild(d)});
+const mix=(h,a)=>{const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=c=>Math.round(c+(255-c)*a);return `rgb(${f(r)},${f(g)},${f(b)})`};
+function fillBase(){if(!base)return;
+ const cs=picked.length?picked:['#f48fb1'];
+ const stops=cs.length>1?cs.map((c,i)=>({offset:i/(cs.length-1),color:c})):[{offset:0,color:cs[0]},{offset:1,color:mix(cs[0],.55)}];
+ base.set('fill',new fabric.Gradient({type:'linear',gradientUnits:'pixels',coords:{x1:0,y1:0,x2:base.width,y2:base.height},colorStops:stops}));
+ canvas.renderAll()}
+
+/* ---------- base shape ---------- */
+function drawBase(){loading=true;if(base)canvas.remove(base);
+ const t=$('shape').value,o={isBase:true,selectable:false,evented:false,stroke:'rgba(255,255,255,.75)',strokeWidth:6,shadow:new fabric.Shadow({color:'rgba(0,0,0,.25)',blur:18,offsetY:8})};
+ if(t==='rectangle')base=new fabric.Rect({...o,width:400,height:290,left:50,top:105,rx:18,ry:18});
+ else if(t==='heart')base=new fabric.Path("M 272.7 51.48 C 252.1 20.82 208.03 20.82 187.43 51.48 L 180 62.53 L 172.57 51.48 C 151.97 20.82 107.9 20.82 87.3 51.48 C 66.7 82.14 74.13 126.21 104.79 156.87 L 180 232.08 L 255.21 156.87 C 285.87 126.21 293.3 82.14 272.7 51.48 Z",{...o,scaleX:1.85,scaleY:1.85,left:54,top:62});
+ else base=new fabric.Circle({...o,radius:200,left:50,top:50,...(t==='clock'?{stroke:'#222',strokeWidth:8}:{}),...(t==='thali'?{stroke:'#d4af37',strokeWidth:10}:{})});
+ canvas.add(base);canvas.sendToBack(base);fillBase();loading=false;snap();recalc()}
+$('shape').onchange=()=>selectFixedShape($('shape').value);
+
+/* ---------- raw materials (your photo if it exists, else built-in drawing) ---------- */
+const svg=s=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'>${s}</svg>`);
+/* turns a built-in drawing into a plain PNG first, so it always shows on the canvas (your own photos pass through unchanged) */
+function prep(src,cb){if(src.indexOf('data:image/svg')!==0)return cb(src);
+ const im=new Image();
+ im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=300;c.getContext('2d').drawImage(im,0,0,300,300);let u;try{u=c.toDataURL('image/png')}catch(e){u=src}cb(u)};
+ im.onerror=()=>cb(src);im.src=src}
+const mats=[
+ {id:'gold-flakes',n:'Gold flakes',s:"<polygon points='10,30 35,10 45,35 20,50' fill='#f5b400'/><polygon points='55,55 85,45 80,80 60,85' fill='#ffd54a'/><polygon points='50,10 70,15 62,32' fill='#e0a000'/><polygon points='15,65 35,60 38,82 20,88' fill='#ffcc33'/>"},
+ {id:'silver-glitter',n:'Silver glitter',s:"<path d='M30 8l5 18 18 5-18 5-5 18-5-18-18-5 18-5z' fill='#dfe6ea' stroke='#b0bec5'/><path d='M72 48l4 11 11 4-11 4-4 11-4-11-11-4 11-4z' fill='#fff' stroke='#b0bec5'/><circle cx='25' cy='78' r='5' fill='#cfd8dc'/>"},
+ {id:'rose-petal',n:'Rose petal',s:"<path d='M50 92C10 70 8 25 50 8c42 17 40 62 0 84z' fill='#c2185b'/><path d='M50 85C28 65 28 35 50 18' stroke='#f48fb1' fill='none' stroke-width='3'/>"},
+ {id:'dried-flower',n:'Dried flower',s:"<g fill='#fff3d6' stroke='#e8b93c' stroke-width='2'><circle cx='50' cy='22' r='16'/><circle cx='78' cy='50' r='16'/><circle cx='50' cy='78' r='16'/><circle cx='22' cy='50' r='16'/></g><circle cx='50' cy='50' r='14' fill='#f5b400'/>"},
+ {id:'leaf',n:'Green leaf',s:"<path d='M15 85C10 40 40 10 88 12 90 60 60 90 15 85z' fill='#2e8b57'/><path d='M15 85L70 30' stroke='#a5d6a7' stroke-width='3'/>"},
+ {id:'butterfly',n:'Butterfly',s:"<ellipse cx='30' cy='35' rx='24' ry='20' fill='#8b5cf6'/><ellipse cx='70' cy='35' rx='24' ry='20' fill='#8b5cf6'/><ellipse cx='32' cy='68' rx='17' ry='15' fill='#d9506a'/><ellipse cx='68' cy='68' rx='17' ry='15' fill='#d9506a'/><rect x='47' y='25' width='6' height='55' rx='3' fill='#222'/>"},
+ {id:'seashell',n:'Seashell',s:"<path d='M50 90L10 40C20 5 80 5 90 40z' fill='#f6d6c8' stroke='#d49a89' stroke-width='3'/><path d='M50 90L30 20M50 90L50 12M50 90L70 20' stroke='#d49a89' stroke-width='3'/>"},
+ {id:'pearl',n:'Pearl',s:"<defs><radialGradient id='g' cx='35%' cy='35%'><stop offset='0' stop-color='#fff'/><stop offset='1' stop-color='#cfc8c0'/></radialGradient></defs><circle cx='50' cy='50' r='40' fill='url(#g)'/>"},
+ {id:'crystal',n:'Crystal',s:"<polygon points='50,5 85,35 70,90 30,90 15,35' fill='#7dd3fc' stroke='#0ea5e9' stroke-width='2'/><polygon points='50,5 50,90 15,35' fill='#bae6fd' opacity='.6'/>"}
+];
+mats.forEach(m=>{m.src=svg(m.s);
+ const isFl=m.id==='dried-flower';
+ const d=document.createElement('div');d.className='mat';d.innerHTML=`<img alt="${m.n}"><div>${m.n}${isFl?' ▾':''}</div>`;
+ const im=d.querySelector('img');im.src=m.src;
+ const t=new Image();t.onload=()=>{m.src=t.src;im.src=t.src};t.src='images/materials/'+m.id+'.png'; // your own photo wins if the file exists
+ d.onclick=()=>{if(isFl){const b=$('flowerBox');b.style.display='block';b.scrollIntoView({behavior:'smooth',block:'nearest'})}else addMat(m)};$('matGrid').appendChild(d)});
+function addMat(m,pos){const im=new Image();
+ im.onload=()=>{const f=new fabric.Image(im,{left:pos?pos.x:150+Math.random()*180,top:pos?pos.y:150+Math.random()*180,angle:Math.random()*60-30,cornerColor:'#f5b400',cornerSize:9,transparentCorners:false});
+  f.set('shadow',new fabric.Shadow({color:'rgba(0,0,0,.4)',blur:6,offsetX:1,offsetY:2}));
+  f.scaleToWidth(90);f.isResinAddOn=true;f.isMat=m.id;canvas.add(f);canvas.setActiveObject(f);canvas.renderAll()};
+ prep(m.src,u=>{im.src=u})}
+
+/* ---------- real flowers (sub options with own price; edit names / prices here) ---------- */
+const bloom=(pc,cc,n,r,pr)=>{let s='';for(let i=0;i<n;i++){const a=i*2*Math.PI/n,x=50+Math.cos(a)*r,y=50+Math.sin(a)*r;s+=`<circle cx='${x.toFixed(1)}' cy='${y.toFixed(1)}' r='${pr}' fill='${pc}' stroke='rgba(0,0,0,.35)' stroke-width='1.5'/>`}return s+`<circle cx='50' cy='50' r='${pr*.8}' fill='${cc}'/>`};
+const flowers=[
+ {id:'marigold',n:'Marigold (genda)',p:30,s:bloom('#f59e0b','#b45309',10,24,14)},
+ {id:'rose',n:'Real rose',p:40,s:bloom('#be123c','#7f1d1d',7,22,18)},
+ {id:'jasmine',n:'Jasmine (mogra)',p:25,s:bloom('#fffdf5','#fde68a',6,22,16)},
+ {id:'lavender',n:'Lavender sprig',p:35,s:"<path d='M50 95V30' stroke='#4d7c0f' stroke-width='3'/><g fill='#8b5cf6'><ellipse cx='50' cy='14' rx='6' ry='9'/><ellipse cx='41' cy='28' rx='6' ry='9'/><ellipse cx='59' cy='28' rx='6' ry='9'/><ellipse cx='42' cy='46' rx='6' ry='9'/><ellipse cx='58' cy='46' rx='6' ry='9'/></g>"},
+ {id:'hibiscus',n:'Hibiscus',p:40,s:bloom('#ef4444','#facc15',5,22,20)},
+ {id:'lotus',n:'Lotus',p:60,s:"<g fill='#f9a8d4' stroke='#db2777'><ellipse cx='50' cy='52' rx='13' ry='34'/><ellipse cx='50' cy='52' rx='13' ry='34' transform='rotate(-35 50 80)'/><ellipse cx='50' cy='52' rx='13' ry='34' transform='rotate(35 50 80)'/><ellipse cx='50' cy='52' rx='13' ry='34' transform='rotate(-65 50 80)'/><ellipse cx='50' cy='52' rx='13' ry='34' transform='rotate(65 50 80)'/></g>"},
+ {id:'daisy',n:'Daisy / Chamomile',p:20,s:bloom('#ffffff','#facc15',12,24,10)},
+ {id:'gypsophila',n:"Baby's breath",p:25,s:"<g fill='#fff' stroke='#94a3b8' stroke-width='2'><circle cx='30' cy='30' r='9'/><circle cx='62' cy='24' r='9'/><circle cx='50' cy='52' r='10'/><circle cx='24' cy='68' r='9'/><circle cx='74' cy='66' r='9'/></g>"}
+];
+flowers.forEach(f=>{f.src=svg(f.s);
+ const d=document.createElement('div');d.className='mat';d.innerHTML=`<img alt="${f.n}"><div>${f.n}</div><div style="color:#2a8703;margin-top:2px">₹${f.p} each</div>`;
+ const im=d.querySelector('img');im.src=f.src;
+ const t=new Image();t.onload=()=>{f.src=t.src;im.src=t.src};t.src='images/flowers/'+f.id+'.png'; // your real photo wins if the file exists
+ d.onclick=()=>addFlower(f);$('flGrid').appendChild(d)});
+function addFlower(f,pos){const im=new Image();
+ im.onload=()=>{const o=new fabric.Image(im,{left:pos?pos.x:150+Math.random()*180,top:pos?pos.y:150+Math.random()*180,angle:Math.random()*60-30,cornerColor:'#f5b400',cornerSize:9,transparentCorners:false});
+  o.set('shadow',new fabric.Shadow({color:'rgba(0,0,0,.4)',blur:6,offsetX:1,offsetY:2}));
+  o.scaleToWidth(80);o.isFlower=true;o.flower=f.id;o.fprice=f.p;canvas.add(o);canvas.setActiveObject(o);canvas.renderAll()};
+ prep(f.src,u=>{im.src=u})}
+function flowerList(){const c={};canvas.getObjects().forEach(o=>{if(o.fprice){const n=(flowers.find(x=>x.id===o.flower)||{}).n||o.flower;c[n]=(c[n]||0)+1}});
+ return Object.entries(c).map(([n,q])=>n+' x'+q).join(', ')}
+
+/* ---------- stickers (edit categories / prices / names here) ---------- */
+const badge=(t,bg,fg,sz)=>`<rect x='3' y='26' width='94' height='48' rx='24' fill='${bg}' stroke='${fg}' stroke-width='3'/><text x='50' y='${50+sz*.35}' font-size='${sz}' font-weight='700' text-anchor='middle' fill='${fg}' font-family='Noto Sans Devanagari,Montserrat,Arial,sans-serif'>${t}</text>`;
+const stCats=[['cute','Cute',20],['god','Gods',30],['rakhi','Rakhi',25],['baby','Baby',25],['party','Birthday',25],['festive','Festive',25]];
+const S=(cat,id,n,body)=>({cat,id,n,p:stCats.find(c=>c[0]===cat)[2],src:svg(body)});
+const stickers=[
+ S('cute','heart','Heart',`<path d='M50 88C10 58 8 28 30 18c12-5 20 2 20 12 0-10 8-17 20-12 22 10 20 40-20 70z' fill='#ff5c8a' stroke='#c2185b' stroke-width='3'/><ellipse cx='32' cy='34' rx='6' ry='4' fill='#fff' opacity='.6'/>`),
+ S('cute','star','Happy star',`<polygon points='50,8 61,38 93,38 67,57 77,89 50,70 23,89 33,57 7,38 39,38' fill='#ffd43b' stroke='#f59f00' stroke-width='3' stroke-linejoin='round'/><circle cx='42' cy='50' r='2.5' fill='#7c4a03'/><circle cx='58' cy='50' r='2.5' fill='#7c4a03'/><path d='M44 58q6 6 12 0' stroke='#7c4a03' fill='none' stroke-width='2'/>`),
+ S('cute','cloud','Smiling cloud',`<g fill='#e0f2fe' stroke='#7dd3fc' stroke-width='3'><circle cx='35' cy='55' r='20'/><circle cx='60' cy='45' r='24'/><circle cx='78' cy='60' r='16'/><rect x='30' y='55' width='50' height='22' stroke='none'/></g><circle cx='46' cy='56' r='2.5' fill='#334155'/><circle cx='64' cy='56' r='2.5' fill='#334155'/><path d='M50 63q6 6 12 0' stroke='#334155' fill='none' stroke-width='2'/>`),
+ S('cute','rainbow','Rainbow',`<g fill='none' stroke-width='9'><path d='M10 80A40 40 0 0 1 90 80' stroke='#ef4444'/><path d='M19 80A31 31 0 0 1 81 80' stroke='#fbbf24'/><path d='M28 80A22 22 0 0 1 72 80' stroke='#22c55e'/><path d='M37 80A13 13 0 0 1 63 80' stroke='#3b82f6'/></g>`),
+ S('cute','sun','Cute sun',`<g stroke='#f59f00' stroke-width='4' stroke-linecap='round'><path d='M50 6v10M50 84v10M6 50h10M84 50h10M19 19l7 7M74 74l7 7M81 19l-7 7M26 74l-7 7'/></g><circle cx='50' cy='50' r='25' fill='#fde047' stroke='#f59f00' stroke-width='3'/><circle cx='42' cy='46' r='3' fill='#7c4a03'/><circle cx='58' cy='46' r='3' fill='#7c4a03'/><path d='M42 58q8 8 16 0' stroke='#7c4a03' fill='none' stroke-width='3' stroke-linecap='round'/><circle cx='36' cy='56' r='4' fill='#fb7185' opacity='.5'/><circle cx='64' cy='56' r='4' fill='#fb7185' opacity='.5'/>`),
+ S('cute','sparkles','Sparkles',`<path d='M40 8l7 24 24 7-24 7-7 24-7-24-24-7 24-7z' fill='#fde68a' stroke='#f59e0b' stroke-width='2'/><path d='M76 52l4 12 12 4-12 4-4 12-4-12-12-4 12-4z' fill='#fff' stroke='#f59e0b' stroke-width='2'/>`),
+ S('cute','love','Love badge',badge('LOVE','#ffe0ec','#d6336c',24)),
+
+ S('god','om','Om',`<circle cx='50' cy='50' r='44' fill='#fff3d6' stroke='#f97316' stroke-width='4'/><text x='50' y='70' font-size='58' text-anchor='middle' fill='#ea580c' font-family='Noto Sans Devanagari,serif'>ॐ</text>`),
+ S('god','krishna-flute','Krishna - flute and feather',`<path d='M50 92C34 72 30 40 50 8c20 32 16 64 0 84z' fill='#0e7490'/><ellipse cx='50' cy='36' rx='14' ry='19' fill='#22d3ee' stroke='#0891b2' stroke-width='2'/><ellipse cx='50' cy='36' rx='8' ry='12' fill='#1d4ed8'/><ellipse cx='50' cy='34' rx='3.5' ry='5.5' fill='#facc15'/><rect x='6' y='70' width='88' height='8' rx='4' fill='#f59e0b' stroke='#9a3412' stroke-width='2' transform='rotate(-18 50 74)'/><g fill='#9a3412' transform='rotate(-18 50 74)'><circle cx='38' cy='74' r='1.8'/><circle cx='48' cy='74' r='1.8'/><circle cx='58' cy='74' r='1.8'/><circle cx='68' cy='74' r='1.8'/></g>`),
+ S('god','makhan-matki','Makhan matki (Krishna)',`<path d='M24 40q-10 28 10 46h32q20-18 10-46z' fill='#f97316' stroke='#9a3412' stroke-width='3'/><ellipse cx='50' cy='40' rx='26' ry='9' fill='#fef3c7' stroke='#9a3412' stroke-width='3'/><circle cx='42' cy='36' r='6' fill='#fffbeb'/><circle cx='58' cy='38' r='5' fill='#fffbeb'/><path d='M30 58q20 8 40 0' stroke='#fde68a' stroke-width='4' fill='none'/>`),
+ S('god','ganesh','Ganesh ji',`<ellipse cx='20' cy='52' rx='15' ry='22' fill='#fdba74' stroke='#c2410c' stroke-width='3'/><ellipse cx='80' cy='52' rx='15' ry='22' fill='#fdba74' stroke='#c2410c' stroke-width='3'/><circle cx='50' cy='52' r='27' fill='#fb923c' stroke='#c2410c' stroke-width='3'/><path d='M34 30L38 10 50 24 62 10 66 30z' fill='#facc15' stroke='#b45309' stroke-width='2'/><circle cx='40' cy='48' r='3.5' fill='#3b1d08'/><circle cx='60' cy='48' r='3.5' fill='#3b1d08'/><path d='M50 54q-6 22 8 28q8 2 6-6' stroke='#fb923c' stroke-width='11' fill='none' stroke-linecap='round'/><path d='M50 54q-6 22 8 28q8 2 6-6' stroke='#c2410c' stroke-width='2' fill='none'/><path d='M38 66l-5 14' stroke='#fff7ed' stroke-width='4' stroke-linecap='round'/><rect x='48' y='34' width='4' height='9' rx='2' fill='#dc2626'/>`),
+ S('god','bal-krishna','Bal Krishna',`<path d='M50 22V9' stroke='#0e7490' stroke-width='3'/><ellipse cx='50' cy='9' rx='7' ry='9' fill='#22d3ee' stroke='#0891b2' stroke-width='1.5'/><ellipse cx='50' cy='9' rx='3.5' ry='5.5' fill='#1d4ed8'/><ellipse cx='50' cy='8' rx='1.6' ry='2.6' fill='#facc15'/><circle cx='23' cy='56' r='6' fill='#6cb4e4' stroke='#3b82c4' stroke-width='2'/><circle cx='77' cy='56' r='6' fill='#6cb4e4' stroke='#3b82c4' stroke-width='2'/><circle cx='50' cy='54' r='27' fill='#6cb4e4' stroke='#3b82c4' stroke-width='3'/><path d='M23 48c0-20 12-30 27-30s27 10 27 30c-6-9-15-14-27-14s-21 5-27 14z' fill='#1f2937'/><path d='M33 40q17-9 34 0' stroke='#facc15' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='48.5' y='42' width='3' height='7' rx='1.5' fill='#dc2626'/><ellipse cx='39' cy='57' rx='4.5' ry='5.5' fill='#fff'/><ellipse cx='61' cy='57' rx='4.5' ry='5.5' fill='#fff'/><circle cx='40' cy='58' r='3' fill='#111827'/><circle cx='60' cy='58' r='3' fill='#111827'/><circle cx='41' cy='56.5' r='1' fill='#fff'/><circle cx='61' cy='56.5' r='1' fill='#fff'/><circle cx='33' cy='67' r='4' fill='#fb7185' opacity='.55'/><circle cx='67' cy='67' r='4' fill='#fb7185' opacity='.55'/><path d='M43 68q7 7 14 0' stroke='#7c2d12' fill='none' stroke-width='2.5' stroke-linecap='round'/><path d='M30 82q20 14 40 0' stroke='#f59e0b' stroke-width='4' fill='none' stroke-linecap='round'/><circle cx='50' cy='91' r='3.5' fill='#dc2626'/>`),
+ S('god','bal-krishna-makhan','Bal Krishna with makhan',`<path d='M50 14V7' stroke='#0e7490' stroke-width='2.5'/><ellipse cx='50' cy='6' rx='5' ry='6' fill='#22d3ee' stroke='#0891b2'/><ellipse cx='50' cy='6' rx='2.5' ry='3.8' fill='#1d4ed8'/><circle cx='50' cy='36' r='22' fill='#6cb4e4' stroke='#3b82c4' stroke-width='3'/><path d='M28 34c0-14 10-22 22-22s22 8 22 22c-5-7-12-10-22-10s-17 3-22 10z' fill='#1f2937'/><ellipse cx='42' cy='40' rx='3.5' ry='4.5' fill='#fff'/><ellipse cx='58' cy='40' rx='3.5' ry='4.5' fill='#fff'/><circle cx='42.5' cy='41' r='2.4' fill='#111827'/><circle cx='57.5' cy='41' r='2.4' fill='#111827'/><path d='M43 49q7 6 14 0' stroke='#7c2d12' fill='none' stroke-width='2.2' stroke-linecap='round'/><circle cx='62' cy='51' r='4' fill='#fef3c7' stroke='#fbbf24'/><path d='M20 66q-8 22 10 32h40q18-10 10-32z' fill='#f97316' stroke='#9a3412' stroke-width='3'/><path d='M30 83q20 8 40 0' stroke='#fde68a' stroke-width='3' fill='none'/><ellipse cx='50' cy='66' rx='30' ry='8' fill='#fef3c7' stroke='#9a3412' stroke-width='3'/><circle cx='27' cy='63' r='6' fill='#6cb4e4' stroke='#3b82c4' stroke-width='1.5'/><circle cx='73' cy='63' r='6' fill='#6cb4e4' stroke='#3b82c4' stroke-width='1.5'/>`),
+ S('god','bal-ganesh','Bal Ganesh',`<ellipse cx='50' cy='82' rx='26' ry='17' fill='#fdba74' stroke='#c2410c' stroke-width='3'/><path d='M25 86q25 16 50 0v7q-25 12-50 0z' fill='#facc15' stroke='#b45309' stroke-width='2'/><circle cx='50' cy='80' r='2.5' fill='#c2410c'/><ellipse cx='23' cy='40' rx='13' ry='17' fill='#fdba74' stroke='#c2410c' stroke-width='3'/><ellipse cx='77' cy='40' rx='13' ry='17' fill='#fdba74' stroke='#c2410c' stroke-width='3'/><circle cx='50' cy='40' r='22' fill='#fb923c' stroke='#c2410c' stroke-width='3'/><path d='M35 25L39 8 50 18 61 8 65 25z' fill='#facc15' stroke='#b45309' stroke-width='2'/><rect x='48' y='25' width='4' height='8' rx='2' fill='#dc2626'/><circle cx='42' cy='38' r='3.8' fill='#3b1d08'/><circle cx='58' cy='38' r='3.8' fill='#3b1d08'/><circle cx='43' cy='36.8' r='1.2' fill='#fff'/><circle cx='59' cy='36.8' r='1.2' fill='#fff'/><path d='M50 45q-4 14 8 19q7 1 6-5' stroke='#fb923c' stroke-width='9' fill='none' stroke-linecap='round'/><path d='M50 45q-4 14 8 19q7 1 6-5' stroke='#c2410c' stroke-width='1.5' fill='none'/><path d='M40 54l-3 9' stroke='#fff7ed' stroke-width='4' stroke-linecap='round'/><circle cx='34' cy='48' r='3.5' fill='#fb7185' opacity='.5'/><path d='M70 78q4-9 10 0q-1 6-5 7q-4-1-5-7z' fill='#fde68a' stroke='#b45309' stroke-width='1.5'/>`),
+ S('god','modak','Modak (Ganesh ji)',`<path d='M50 6c4 8 6 10 10 14 14 6 24 20 20 36-3 14-18 22-30 22S23 70 20 56C16 40 26 26 40 20c4-4 6-6 10-14z' fill='#fde68a' stroke='#d97706' stroke-width='3'/><path d='M30 52q20 12 40 0M34 38q16 8 32 0' stroke='#f59e0b' stroke-width='2.5' fill='none' stroke-linecap='round'/>`),
+ S('god','trishul','Mahadev - trishul',`<g fill='none' stroke='#475569' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'><path d='M50 94V26'/><path d='M26 14c0 22 8 34 24 34s24-12 24-34'/></g><polygon points='50,4 58,24 42,24' fill='#facc15' stroke='#b45309' stroke-width='2'/><polygon points='26,6 31,20 21,20' fill='#facc15' stroke='#b45309' stroke-width='2'/><polygon points='74,6 79,20 69,20' fill='#facc15' stroke='#b45309' stroke-width='2'/><ellipse cx='50' cy='64' rx='8' ry='3' fill='none' stroke='#475569' stroke-width='3'/>`),
+ S('god','damru-moon','Mahadev - damru and moon',`<path d='M62 10A38 38 0 1 0 90 66 A30 30 0 1 1 62 10z' fill='#fde68a' stroke='#f59e0b' stroke-width='3'/><g transform='translate(30 28) scale(.55)'><polygon points='25,20 75,20 50,50' fill='#f59e0b' stroke='#9a3412' stroke-width='5'/><polygon points='25,80 75,80 50,50' fill='#f59e0b' stroke='#9a3412' stroke-width='5'/></g>`),
+ S('god','gada','Hanuman ji - gada',`<circle cx='50' cy='28' r='22' fill='#f59e0b' stroke='#9a3412' stroke-width='3'/><circle cx='42' cy='22' r='4' fill='#fde68a'/><circle cx='58' cy='24' r='4' fill='#fde68a'/><circle cx='50' cy='36' r='4' fill='#fde68a'/><rect x='44' y='46' width='12' height='46' rx='5' fill='#b45309' stroke='#78350f' stroke-width='2'/>`),
+ S('god','har-har-mahadev','Har Har Mahadev',badge('हर हर महादेव','#fff0e0','#ea580c',12)),
+ S('god','jai-shri-krishna','Jai Shri Krishna',badge('जय श्री कृष्ण','#e0f2fe','#0369a1',13)),
+ S('god','jai-shri-ram','Jai Shri Ram',badge('जय श्री राम','#fff0e0','#c2410c',14)),
+ S('god','radhe-radhe','Radhe Radhe',badge('राधे राधे','#ffe4f1','#be185d',17)),
+
+ S('rakhi','rakhi-1','Rakhi - flower',`<path d='M28 6Q46 36 40 46M72 6Q54 36 60 46' stroke='#ef4444' stroke-width='5' fill='none' stroke-linecap='round'/><g transform='translate(0 8)'>${bloom('#fde047','#ef4444',8,18,9)}</g><circle cx='50' cy='58' r='6' fill='#fff' stroke='#b45309' stroke-width='1.5'/>`),
+ S('rakhi','rakhi-pearl','Rakhi - pearl',`<path d='M28 6Q46 36 40 46M72 6Q54 36 60 46' stroke='#f59e0b' stroke-width='5' fill='none' stroke-linecap='round'/><g transform='translate(0 8)'>${bloom('#ffffff','#f43f5e',10,24,7)}</g>`),
+ S('rakhi','rakhi-om','Rakhi - Om',`<path d='M28 6Q46 36 40 46M72 6Q54 36 60 46' stroke='#dc2626' stroke-width='5' fill='none' stroke-linecap='round'/><circle cx='50' cy='62' r='26' fill='#fde68a' stroke='#b45309' stroke-width='3'/><text x='50' y='76' font-size='38' text-anchor='middle' fill='#c2410c' font-family='Noto Sans Devanagari,serif'>ॐ</text>`),
+ S('rakhi','raksha-bandhan','Raksha Bandhan',badge('रक्षाबंधन','#ffe4e6','#be123c',19)),
+ S('rakhi','bhai-behna','Bhai Behna',badge('Bhai Behna','#e0f2fe','#0369a1',16)),
+
+ S('baby','baby-feet','Baby feet',`<g fill='#fbcfe8' stroke='#db2777' stroke-width='2'><ellipse cx='30' cy='64' rx='14' ry='22'/><ellipse cx='70' cy='64' rx='14' ry='22'/><circle cx='20' cy='36' r='4.5'/><circle cx='29' cy='31' r='4'/><circle cx='38' cy='32' r='3.6'/><circle cx='45' cy='37' r='3.2'/><circle cx='80' cy='36' r='4.5'/><circle cx='71' cy='31' r='4'/><circle cx='62' cy='32' r='3.6'/><circle cx='55' cy='37' r='3.2'/></g>`),
+ S('baby','bottle','Baby bottle',`<rect x='36' y='38' width='28' height='50' rx='8' fill='#e0f2fe' stroke='#38bdf8' stroke-width='3'/><rect x='40' y='22' width='20' height='16' rx='4' fill='#f9a8d4' stroke='#db2777' stroke-width='2'/><path d='M50 6c8 4 8 12 0 16-8-4-8-12 0-16z' fill='#fbcfe8' stroke='#db2777' stroke-width='2'/><g stroke='#38bdf8' stroke-width='2'><path d='M36 52h10M36 62h10M36 72h10'/></g>`),
+ S('baby','teddy','Teddy bear',`<circle cx='25' cy='25' r='13' fill='#b4793c'/><circle cx='75' cy='25' r='13' fill='#b4793c'/><circle cx='25' cy='25' r='6' fill='#f3c999'/><circle cx='75' cy='25' r='6' fill='#f3c999'/><circle cx='50' cy='55' r='33' fill='#c98a4b' stroke='#8a5a2b' stroke-width='3'/><ellipse cx='50' cy='66' rx='15' ry='11' fill='#f3c999'/><circle cx='39' cy='50' r='4' fill='#3b2412'/><circle cx='61' cy='50' r='4' fill='#3b2412'/><ellipse cx='50' cy='62' rx='5' ry='3.5' fill='#3b2412'/><path d='M50 66v4M44 71q6 5 12 0' stroke='#3b2412' fill='none' stroke-width='2'/>`),
+ S('baby','rattle','Rattle',`<circle cx='50' cy='32' r='22' fill='#fde68a' stroke='#f59e0b' stroke-width='3'/><rect x='46' y='52' width='8' height='32' rx='4' fill='#f472b6'/><circle cx='50' cy='90' r='6' fill='#f472b6'/><circle cx='42' cy='28' r='4' fill='#f472b6'/><circle cx='58' cy='36' r='4' fill='#60a5fa'/>`),
+ S('baby','baby-boy','Baby Boy',badge('Baby Boy','#dbeafe','#1d4ed8',17)),
+ S('baby','baby-girl','Baby Girl',badge('Baby Girl','#fce7f3','#be185d',17)),
+ S('baby','little-angel','Little Angel',badge('Little Angel','#fef9c3','#a16207',15)),
+
+ S('party','balloon','Balloon',`<path d='M50 8C25 8 20 40 38 62c4 5 8 8 12 8s8-3 12-8C80 40 75 8 50 8z' fill='#f43f5e' stroke='#be123c' stroke-width='3'/><path d='M50 70l-4 8h8z' fill='#be123c'/><path d='M50 78q-8 8 0 16' stroke='#64748b' fill='none' stroke-width='2'/><ellipse cx='38' cy='30' rx='5' ry='9' fill='#fff' opacity='.45'/>`),
+ S('party','cake','Birthday cake',`<rect x='18' y='52' width='64' height='36' rx='6' fill='#fbcfe8' stroke='#db2777' stroke-width='3'/><path d='M18 62q8 8 16 0t16 0t16 0t16 0' fill='#fff' stroke='#db2777' stroke-width='2'/><rect x='46' y='30' width='8' height='22' fill='#60a5fa'/><path d='M50 16c-6 6-2 12 0 14 2-2 6-8 0-14z' fill='#fbbf24' stroke='#ea580c' stroke-width='2'/>`),
+ S('party','gift','Gift box',`<rect x='15' y='40' width='70' height='48' rx='4' fill='#a78bfa' stroke='#6d28d9' stroke-width='3'/><rect x='10' y='30' width='80' height='16' rx='4' fill='#c4b5fd' stroke='#6d28d9' stroke-width='3'/><rect x='45' y='30' width='10' height='58' fill='#fde047'/><path d='M50 30c-20-22-34-6-10 0zM50 30c20-22 34-6 10 0z' fill='#fde047' stroke='#b45309' stroke-width='2'/>`),
+ S('party','party-hat','Party hat',`<polygon points='50,8 82,88 18,88' fill='#38bdf8' stroke='#0369a1' stroke-width='3' stroke-linejoin='round'/><circle cx='50' cy='10' r='7' fill='#fde047'/><circle cx='42' cy='52' r='5' fill='#fff'/><circle cx='58' cy='70' r='5' fill='#f43f5e'/><circle cx='38' cy='76' r='4' fill='#facc15'/>`),
+ S('party','happy-birthday','Happy Birthday',badge('Happy Birthday','#fef9c3','#c2410c',13)),
+
+ S('festive','diya','Diya',`<path d='M12 58q38 44 76 0z' fill='#f97316' stroke='#9a3412' stroke-width='3'/><path d='M50 56c-15-13-6-28 0-42 6 14 15 29 0 42z' fill='#fbbf24' stroke='#ea580c' stroke-width='2'/><path d='M50 50c-6-6-3-12 0-18 3 6 6 12 0 18z' fill='#fff7ed'/>`),
+ S('festive','swastik','Swastik',`<g stroke='#dc2626' stroke-width='9' fill='none' stroke-linecap='square'><path d='M50 12V88M12 50H88'/><path d='M50 12h24M88 50v24M50 88H26M12 50V26'/></g>`),
+ S('festive','shubh-labh','Shubh Labh',badge('शुभ लाभ','#fee2e2','#b91c1c',20)),
+ S('festive','happy-diwali','Happy Diwali',badge('Happy Diwali','#fff7dc','#c2410c',15)),
+ S('festive','eid-moon','Eid moon and star',`<path d='M62 10A38 38 0 1 0 90 66 A30 30 0 1 1 62 10z' fill='#fde68a' stroke='#f59e0b' stroke-width='3'/><polygon points='64,34 68,46 80,46 70,53 74,65 64,58 54,65 58,53 48,46 60,46' fill='#fde68a' stroke='#f59e0b' stroke-width='2'/>`),
+ S('festive','congrats','Congratulations',badge('Congrats!','#dcfce7','#15803d',17))
+];
+let stCat='cute';
+function renderStickers(){const g=$('stGrid');g.innerHTML='';
+ stickers.filter(s=>s.cat===stCat).forEach(s=>{
+  const d=document.createElement('div');d.className='mat';
+  d.innerHTML=`<img alt="${s.n}"><div>${s.n}</div><div style="color:#2a8703;margin-top:2px">₹${s.p} each</div>`;
+  const im=d.querySelector('img');im.src=s.src;
+  if(!s.tried){s.tried=1;const t=new Image();t.onload=()=>{s.src=t.src;im.src=t.src};t.src='images/stickers/'+s.id+'.png'} // your own artwork wins if the file exists
+  d.onclick=()=>addSticker(s);g.appendChild(d)})}
+stCats.forEach(([id,n])=>{const b=document.createElement('button');b.type='button';b.className='chip'+(id===stCat?' on':'');b.textContent=n;
+ b.onclick=()=>{stCat=id;document.querySelectorAll('#stCats .chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderStickers()};$('stCats').appendChild(b)});
+function addSticker(s,pos){const im=new Image();
+ im.onload=()=>{const o=new fabric.Image(im,{left:pos?pos.x:150+Math.random()*180,top:pos?pos.y:150+Math.random()*180,angle:Math.random()*40-20,cornerColor:'#f5b400',cornerSize:9,transparentCorners:false});
+  o.set('shadow',new fabric.Shadow({color:'rgba(0,0,0,.35)',blur:6,offsetX:1,offsetY:2}));
+  o.scaleToWidth(90);o.isSticker=true;o.sticker=s.id;o.sprice=s.p;canvas.add(o);canvas.setActiveObject(o);canvas.renderAll()};
+ prep(s.src,u=>{im.src=u})}
+function stickerList(){const c={};canvas.getObjects().forEach(o=>{if(o.sprice){const n=(stickers.find(x=>x.id===o.sticker)||{}).n||o.sticker;c[n]=(c[n]||0)+1}});
+ return Object.entries(c).map(([n,q])=>n+' x'+q).join(', ')}
+renderStickers();
+
+/* ---------- AI designer ---------- */
+/* AI_ENDPOINTS are the server functions: /api/ai-design (Claude) and /api/ai-chatgpt (ChatGPT).
+   The "AI engine" dropdown picks one. If the server is not reachable, the quick mode below is used instead. */
+const AI_ENDPOINTS={claude:'/api/ai-design',chatgpt:'/api/ai-chatgpt'},AI_DRAW_PRICE=50,AI_MAX_ITEMS=10;
+const shapeIds=[...$('shape').options].map(o=>o.value),fontIds=[...$('font').options].map(o=>o.value),langIds=[...$('lang').options].map(o=>o.value).filter(Boolean);
+const aiCatalog=()=>({shapes:[...$('shape').options].map(o=>({id:o.value,name:o.textContent.split(' (')[0]})),colors:colors.map(c=>c[0]),
+ stickers:stickers.filter(s=>s.cat!=='ai').map(s=>({id:s.id,name:s.n})),flowers:flowers.map(f=>({id:f.id,name:f.n})),materials:mats.map(m=>({id:m.id,name:m.n})),
+ packing:packs.map(p=>({id:p[0],name:p[2]})),languages:langIds,fonts:fontIds,maxSize:24});
+
+/* quick mode: picks options from keywords in the idea (no server needed) */
+function aiLocal(idea){
+ let t=' '+idea.toLowerCase()+' ';
+ const sp={message:'Here is a starting design based on your idea. Move, resize or change anything you like.',shape:'circle',size:4,colors:[],text:null,stickers:[],flowers:[],materials:[],packing:'standard',drawings:[],note:idea};
+ const hit=[[/clock|watch/,'clock'],[/thali|pooja|puja|aarti/,'thali'],[/heart/,'heart'],[/frame|photo|plaque|name ?plate/,'rectangle'],[/t-?light|candle/,'tlight']].find(x=>x[0].test(t));
+ if(hit)sp.shape=hit[1];
+ sp.size={clock:8,thali:8,rectangle:4,heart:3,tlight:4,circle:4}[sp.shape];
+ const mm=t.match(/(\d+(?:\.\d+)?)\s*(?:inch|inches|in\b|")/);if(mm)sp.size=Math.min(24,Math.max(1,+mm[1]));
+ [['rose gold','Rose Gold'],['gold','Champagne'],['blue','Ocean Blue'],['pink','Coral Pink'],['red','Ruby Red'],['green','Emerald Green'],['yellow','Amber Yellow'],['white','Ivory White'],['black','Jet Black'],['purple','Lavender'],['lavender','Lavender'],['orange','Sunset Orange'],['turquoise','Turquoise'],['teal','Turquoise'],['clear','Clear'],['grey','Charcoal'],['gray','Charcoal']]
+  .forEach(([k,n])=>{if(t.includes(k)){if(sp.colors.length<3&&!sp.colors.includes(n))sp.colors.push(n);t=t.split(k).join(' ')}});
+ const st=[];
+ [[/bal krishna|baal krishna|bal gopal|laddu gopal|ladoo gopal|little krishna|baby krishna|kanha ji/,['bal-krishna','bal-krishna-makhan']],[/bal ganesh|baal ganesh|little ganesh|baby ganesh|bal ganpati/,['bal-ganesh','modak']],[/krishna|kanha|janmashtami|govind/,['krishna-flute','makhan-matki']],[/mahadev|shiv|bholenath|mahakal/,['trishul','damru-moon']],[/ganesh|ganpati|bappa/,['ganesh']],[/\bom\b/,['om']],[/hanuman|bajrang/,['gada']],[/\bram\b/,['jai-shri-ram']],[/radha/,['radhe-radhe']],
+  [/rakhi|raksha|bhai|bhaiya|behna|brother|sister/,['rakhi-1','bhai-behna']],[/baby|newborn|infant|toddler|\bkid|child/,['baby-feet','teddy']],[/birthday|bday/,['balloon','cake']],[/diwali|deepavali|diya/,['diya','happy-diwali']],
+  [/\beid\b|ramadan/,['eid-moon']],[/love|valentine|anniversary|wedding|couple|heart/,['heart']],[/cute|kawaii/,['star','cloud']],[/congrat|promotion|graduat/,['congrats']],[/shubh|labh|laxmi|lakshmi|griha|housewarming/,['shubh-labh']]]
+  .forEach(([r,ids])=>{if(r.test(t))st.push(...ids)});
+ sp.stickers=[...new Set(st)].slice(0,6);
+ const fl=[];
+ [[/marigold|genda/,'marigold'],[/\brose\b|gulab/,'rose'],[/jasmine|mogra|chameli/,'jasmine'],[/lavender/,'lavender'],[/hibiscus|japa/,'hibiscus'],[/lotus|kamal/,'lotus'],[/daisy|chamomile/,'daisy']].forEach(([r,id])=>{if(r.test(t))fl.push(id)});
+ if(!fl.length&&/flower|floral|bloom|garden/.test(t))fl.push('rose','daisy');
+ sp.flowers=fl.slice(0,4);
+ const mt=[];
+ [[/gold flake|gold leaf|foil/,'gold-flakes'],[/glitter|sparkle|shimmer/,'silver-glitter'],[/petal/,'rose-petal'],[/\bleaf|leaves/,'leaf'],[/butterfl/,'butterfly'],[/shell|\bsea\b|ocean|beach/,'seashell'],[/pearl/,'pearl'],[/crystal|\bgem|stone/,'crystal']].forEach(([r,id])=>{if(r.test(t))mt.push(id)});
+ sp.materials=mt.slice(0,3);
+ const pk=[[/birthday|bday/,'birthday'],[/wedding|anniversary|couple/,'wedding'],[/diwali|festive|festival|deepavali/,'diwali'],[/housewarming|griha|new home/,'housewarming'],[/baby|newborn|shower/,'baby'],[/\beco\b|kraft/,'eco'],[/luxury|premium|velvet/,'luxury']].find(x=>x[0].test(t));
+ if(pk)sp.packing=pk[1];
+ const q=idea.match(/["“]([^"”]{1,40})["”]/);
+ if(q)sp.text={content:q[1].trim(),language:/[ऀ-ॿ]/.test(q[1])?'Hindi':'English',font:'Playfair Display',color:'#d4af37'};
+ return sp}
+
+/* checks anything coming back (from the server or quick mode) so only valid options are used */
+function aiClean(sp){
+ const o={message:String(sp.message||'').slice(0,300),shape:shapeIds.includes(sp.shape)?sp.shape:'circle',size:FIXED_SIZES[shapeIds.includes(sp.shape)?sp.shape:'circle']||4,colors:[],text:null,stickers:[],flowers:[],materials:[],packing:'standard',drawings:[]};
+ (sp.colors||[]).forEach(n=>{if(colors.some(c=>c[0]===n)&&!o.colors.includes(n)&&o.colors.length<3)o.colors.push(n)});
+ if(sp.text&&typeof sp.text.content==='string'&&sp.text.content.trim())o.text={content:sp.text.content.trim().slice(0,60),language:langIds.includes(sp.text.language)?sp.text.language:'English',font:fontIds.includes(sp.text.font)?sp.text.font:'Playfair Display',color:/^#[0-9a-f]{6}$/i.test(sp.text.color||'')?sp.text.color:'#d4af37'};
+ const take=(arr,list,key)=>(arr||[]).forEach(x=>{const id=typeof x==='string'?x:x&&x.id,n=Math.min(3,Math.max(1,+(x&&x.count)||1));if(list.some(l=>l.id===id))for(let i=0;i<n;i++)o[key].push(id)});
+ take(sp.stickers,stickers.filter(s=>s.cat!=='ai'),'stickers');take(sp.flowers,flowers,'flowers');take(sp.materials,mats,'materials');
+ if(packs.some(p=>p[0]===sp.packing))o.packing=sp.packing;
+ (sp.drawings||[]).slice(0,2).forEach(d=>{if(d&&typeof d.svg==='string'){
+  const s=d.svg.replace(/<\s*(script|foreignObject|image|iframe|style)[\s\S]*?(<\/\s*\1\s*>|$)/gi,'').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,'').replace(/(xlink:)?href\s*=\s*("[^"]*"|'[^']*')/gi,'');
+  if(s.length>0&&s.length<6000)o.drawings.push({title:String(d.title||'Custom drawing').slice(0,40),svg:s})}});
+ return o}
+
+/* builds the design on the canvas */
+function aiApply(sp,idea){
+ loading=true;canvas.getObjects().filter(o=>!o.isBase).forEach(o=>canvas.remove(o));canvas.discardActiveObject();loading=false;
+ $('shape').value=sp.shape;$('len').value=FIXED_SIZES[sp.shape]||4;syncShapeCards();
+ picked.length=0;const sws=document.querySelectorAll('#sw .s');sws.forEach(e=>e.classList.remove('on'));
+ sp.colors.forEach(n=>{const i=colors.findIndex(c=>c[0]===n);if(i>-1){picked.push(colors[i][1]);sws[i].classList.add('on')}});
+ drawBase();
+ const pr=document.querySelector('input[name=pack][value="'+sp.packing+'"]');if(pr){pr.checked=true;packSel=sp.packing}
+ $('note').value=('AI idea: '+idea).slice(0,600);$('noteCnt').textContent=$('note').value.length;
+ if(sp.text){$('lang').value=sp.text.language;$('txt').value=sp.text.content;$('font').value=sp.text.font;$('tcol').value=sp.text.color;$('addText').click();const t=canvas.getActiveObject();if(t)canvas.centerObject(t)}
+ const items=[];
+ sp.drawings.forEach((d,i)=>{const e={cat:'ai',id:'ai-'+Date.now()+'-'+i,n:'AI drawing: '+d.title,p:AI_DRAW_PRICE,src:svg(d.svg)};stickers.push(e);items.push(pos=>addSticker(e,pos))});
+ sp.stickers.forEach(id=>{const s=stickers.find(x=>x.id===id);if(s)items.push(pos=>addSticker(s,pos))});
+ sp.flowers.forEach(id=>{const f=flowers.find(x=>x.id===id);if(f)items.push(pos=>addFlower(f,pos))});
+ sp.materials.forEach(id=>{const m=mats.find(x=>x.id===id);if(m)items.push(pos=>addMat(m,pos))});
+ const list=items.slice(0,AI_MAX_ITEMS),n=list.length,rect=sp.shape==='rectangle',heart=sp.shape==='heart';
+ const rx=rect?145:heart?100:135,ry=rect?65:heart?100:135;
+ list.forEach((add,i)=>{
+  if(n===1&&!sp.text)return add({x:205,y:205});
+  const a=-Math.PI/2+i*2*Math.PI/n;add({x:250+rx*Math.cos(a)-45,y:250+ry*Math.sin(a)-45+(heart?10:0)})});
+ canvas.discardActiveObject();canvas.renderAll();snap();recalc()}
+
+async function aiCreate(idea){
+ let sp;
+ const engine=$('aiEngine').value,url=AI_ENDPOINTS[engine]||AI_ENDPOINTS.chatgpt;
+ try{
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),45000);
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea,catalog:aiCatalog()}),signal:ctl.signal});
+  clearTimeout(to);
+  if(!r.ok)throw new Error('http '+r.status+' from '+url);
+  sp=await r.json();if(!sp||typeof sp!=='object'||sp.error)throw new Error('bad reply from '+url);
+ }catch(e){console.warn('AI server not available ('+engine+'), using quick mode:',e.message);sp=aiLocal(idea)}
+ return aiClean(sp)}
+
+['Krishna theme gift for my sister, blue and gold, 6 inch heart, with the name "Anaya"','Baby shower keepsake in soft pink with baby feet and a teddy','Rakhi special for my brother, name "Rohan", with marigold flowers','Wedding anniversary frame, rose gold, with roses and a gift box'].forEach(x=>{
+ const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=x.length>34?x.slice(0,32)+'…':x;b.title=x;b.onclick=()=>{$('aiIdea').value=x};$('aiEx').appendChild(b)});
+$('aiGo').onclick=async()=>{
+ const idea=$('aiIdea').value.trim();if(idea.length<3)return toast('Please describe your idea first');
+ const b=$('aiGo'),out=$('aiOut');b.disabled=true;b.textContent='Creating your design…';out.style.display='none';
+ try{const sp=await aiCreate(idea);aiApply(sp,idea);
+  out.textContent=(sp.message||'Your design is ready.')+' Check the Price tab for the estimate. Not quite right? Change your idea and tap Create again, or edit it on the canvas.';out.style.display='block'}
+ catch(e){console.error(e);toast('Could not create the design. Please try again.')}
+ b.disabled=false;b.textContent='✨ Create my design'};
+
+/* AI picture: asks the server (see ai-image.js) to paint a picture, previews it, then adds it as a priced sticker */
+const IMG_ENDPOINT='/api/ai-image',AI_ART_PRICE=150;
+function shrinkImg(url,max,cb){const im=new Image();
+ im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/png'))};
+ im.onerror=()=>cb(url);im.src=url}
+$('imgGo').onclick=async()=>{
+ const idea=$('imgIdea').value.trim();if(idea.length<3)return toast('Please describe the picture first');
+ const b=$('imgGo'),out=$('imgOut');b.disabled=true;b.textContent='Painting your picture… (20 to 40 seconds)';out.style.display='none';
+ try{
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),120000);
+  const r=await fetch(IMG_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea,style:$('imgStyle').value}),signal:ctl.signal});
+  clearTimeout(to);
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||!d.image)throw new Error(d.error||('http '+r.status));
+  shrinkImg(d.image,420,small=>{
+   out.innerHTML='';const im=new Image();im.src=small;im.alt='AI picture';out.appendChild(im);
+   const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap';
+   const add=document.createElement('button');add.className='btn';add.textContent='➕ Add to my design (₹'+AI_ART_PRICE+')';
+   add.onclick=()=>{const e={cat:'ai',id:'art-'+Date.now(),n:'AI picture: '+idea.slice(0,30),p:AI_ART_PRICE,src:small};stickers.push(e);addSticker(e);toast('Picture added. Drag, resize or rotate it.');add.disabled=true};
+   const again=document.createElement('button');again.className='btn';again.style.background='#e91e63';again.textContent='↻ Try again';again.onclick=()=>$('imgGo').click();
+   row.append(add,again);out.appendChild(row);out.style.display='block'});
+ }catch(e){console.warn('AI picture failed:',e.message);toast('Could not create the picture right now. Please try again, or send us your idea on WhatsApp.')}
+ b.disabled=false;b.textContent='🎨 Generate picture'};
+
+/* ---------- text ---------- */
+$('addText').onclick=()=>{const t=new fabric.IText($('txt').value.trim()||'Your text',{left:140,top:230,fontFamily:$('font').value,fill:$('tcol').value,fontSize:34,cornerColor:'#e91e63',cornerSize:9,transparentCorners:false});
+ canvas.add(t);canvas.setActiveObject(t);canvas.renderAll()};
+let textSnapTimer=null;
+$('lang').onchange=()=>{snap();recalc()};
+$('txt').oninput=()=>{recalc();clearTimeout(textSnapTimer);textSnapTimer=setTimeout(()=>snap(),450)};
+$('txt').onchange=()=>{clearTimeout(textSnapTimer);snap();recalc()};
+
+/* ---------- photo upload (placed on canvas) ---------- */
+$('photo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=ev=>{const im=new Image();im.onload=()=>{const p=new fabric.Image(im,{left:120,top:120,cornerColor:'#28a745',cornerSize:9,transparentCorners:false});p.scaleToWidth(200);canvas.add(p);canvas.setActiveObject(p)};im.src=ev.target.result};r.readAsDataURL(f)};
+
+/* ---------- ideas: thoughts + reference pictures (not on canvas) ---------- */
+const MAXREF=3;let refs=[];
+$('note').oninput=()=>{$('noteCnt').textContent=$('note').value.length};
+function shrink(file,cb){const r=new FileReader();
+ r.onload=ev=>{const im=new Image();
+  im.onload=()=>{const k=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');
+   c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+   cb(c.toDataURL('image/jpeg',.72))};
+  im.onerror=()=>toast('Could not read that picture');im.src=ev.target.result};
+ r.readAsDataURL(file)}
+function drawRefs(){const box=$('refs');box.innerHTML='';
+ refs.forEach((u,i)=>{const d=document.createElement('div');d.className='ref';
+  d.innerHTML=`<img alt="Reference ${i+1}" src="${u}"><button title="Remove" aria-label="Remove picture">✕</button>`;
+  d.querySelector('button').onclick=()=>{refs.splice(i,1);drawRefs()};box.appendChild(d)})}
+$('ref').onchange=e=>{const files=[...e.target.files];e.target.value='';
+ const room=MAXREF-refs.length;
+ if(room<=0){toast('You can add up to 3 reference pictures');return}
+ if(files.length>room)toast('Only '+room+' more picture(s) can be added');
+ files.slice(0,room).forEach(f=>{if(!f.type.startsWith('image/'))return;shrink(f,u=>{if(refs.length<MAXREF){refs.push(u);drawRefs()}})})};
+
+/* ---------- packing theme (edit names / prices here) ---------- */
+const packs=[['standard','📦','Standard packing',0],['birthday','🎂','Birthday theme',80],['wedding','💍','Wedding / Anniversary theme',120],['diwali','🪔','Diwali / Festive theme',100],['housewarming','🏠','Housewarming theme',90],['baby','🍼','Baby shower / Newborn theme',90],['eco','🌿','Eco kraft packing',60],['luxury','🎀','Luxury velvet gift box',200]];
+let packSel='standard';
+packs.forEach(([id,ic,n,p])=>{const r=document.createElement('div');r.className='row';
+ r.innerHTML=`<label><input type="radio" name="pack" value="${id}"${id===packSel?' checked':''}> ${ic} ${n}</label><span class="tag">${p?'₹'+p:'Free'}</span>`;
+ r.querySelector('input').onchange=()=>{packSel=id;snap();recalc()};$('packs').appendChild(r)});
+const packInfo=()=>packs.find(p=>p[0]===packSel);
+
+/* ---------- extras ---------- */
+const extras=[['keychain-ring','Extra keychain ring',40],['gift-box','Gift box packaging',100],['photo-insert','Photo print insert',90],['diya-holder','Pooja diya holder add-on',120],['nameplate-stand','Nameplate display stand',150],['pendant-chain','Jewellery chain / cord',60]];
+const chosen=new Set();
+extras.forEach(([id,n,p])=>{const r=document.createElement('div');r.className='row';
+ r.innerHTML=`<label><input type="checkbox"> ${n}</label><span class="tag">₹${p}</span>`;
+ r.querySelector('input').onchange=e=>{e.target.checked?chosen.add(id):chosen.delete(id);snap();recalc()};$('extras').appendChild(r)});
+
+/* ---------- toolbar ---------- */
+const act=()=>canvas.getActiveObject();
+$('del').onclick=()=>{const a=act();if(!a)return toast('Click an item first');canvas.remove(a);canvas.discardActiveObject();canvas.renderAll()};
+$('dup').onclick=()=>{const a=act();if(!a)return toast('Click an item first');a.clone(c=>{c.set({left:a.left+20,top:a.top+20});canvas.add(c);canvas.setActiveObject(c)},['isResinAddOn','isMat','isFlower','flower','fprice','isSticker','sticker','sprice'])};
+$('flip').onclick=()=>{const a=act();if(!a)return toast('Click an item first');a.toggle('flipX');canvas.renderAll();snap()};
+$('front').onclick=()=>{const a=act();if(!a)return toast('Click an item first');canvas.bringToFront(a);snap()};
+$('back').onclick=()=>{const a=act();if(!a)return toast('Click an item first');canvas.sendToBack(a);if(base)canvas.sendToBack(base);snap()};
+$('op').oninput=e=>{const a=act();if(a){a.set('opacity',e.target.value/100);canvas.renderAll()}};
+$('op').onchange=snap;
+document.addEventListener('keydown',e=>{if(e.key!=='Delete'&&e.key!=='Backspace')return;
+ if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName))return;
+ const a=act();if(a&&!a.isEditing){e.preventDefault();canvas.remove(a);canvas.discardActiveObject();canvas.renderAll()}});
+
+/* ---------- price ---------- */
+function recalc(){
+ const rate=+$('shape').selectedOptions[0].dataset.rate||0,len=+$('len').value||0;
+ const shape=rate*len,resin=30*len,color=picked.length*70;
+ const words=$('txt').value.trim().split(/\s+/).filter(Boolean).length;
+ const text=($('lang').value&&words)?75+words*75:0;
+ const addon=canvas.getObjects().some(o=>o.isResinAddOn)?70:0;
+ let other=0;chosen.forEach(id=>other+=extras.find(x=>x[0]===id)[2]);
+ const pack=packInfo()[3];
+ const flw=canvas.getObjects().reduce((s,o)=>s+(o.fprice||0),0);
+ const stk=canvas.getObjects().reduce((s,o)=>s+(o.sprice||0),0);
+ total=shape+resin+color+text+addon+other+pack+flw+stk;
+ const set=(i,v)=>$(i).textContent='₹'+v;
+ set('b-shape',shape);set('b-resin',resin);set('b-color',color);set('b-text',text);set('b-addon',addon);set('b-other',other);set('b-total',total);set('total',total);
+ set('b-pack',pack);set('tg-pack',pack);set('b-flower',flw);set('tg-flower',flw);set('b-sticker',stk);set('tg-sticker',stk);
+ set('tg-color',color);set('tg-text',text);set('tg-addon',addon);set('tg-other',other)}
+
+/* ---------- export / cart / WhatsApp ---------- */
+function preview(q){canvas.discardActiveObject();canvas.renderAll();
+ try{return canvas.toDataURL({format:'png',quality:q||1})}catch(e){toast('Preview needs the site to be online (not opened from a file)');return ''}}
+$('dl').onclick=()=>{const u=preview();if(!u)return;const a=document.createElement('a');a.download='resin-custom-design.png';a.href=u;a.click()};
+$('wa').onclick=()=>{canvas.discardActiveObject();canvas.renderAll();
+ const note=$('note').value.trim(),e=encodeURIComponent;
+ let m=`*NEW CUSTOM RESIN ORDER DESIGN*%0A%0A• *Shape:* ${e(labels[$('shape').value])}%0A• *Size:* ${e($('len').value)} inch%0A• *Text:* ${e($('txt').value||'None')}%0A• *Estimated price:* ₹${total}`;
+ m+=`%0A• *Packing:* ${e(packInfo()[2])}`;
+ if(flowerList())m+=`%0A• *Flowers:* ${e(flowerList())}`;
+ if(stickerList())m+=`%0A• *Stickers:* ${e(stickerList())}`;
+ if(note)m+=`%0A• *Thoughts:* ${e(note)}`;
+ if(refs.length)m+=`%0A• *Reference pictures:* ${refs.length} (I will send them here)`;
+ m+=`%0A%0AI designed this on your studio. I will send the preview image here.`;
+ window.open('https://wa.me/919175171659?text='+m,'_blank')};
+const CART='saubhagyaCart',getCart=()=>{try{return JSON.parse(localStorage.getItem(CART))||[]}catch(e){return[]}};
+function cartCount(){$('cartCount').textContent=getCart().reduce((s,i)=>s+i.qty,0)}
+$('cart').onclick=()=>{const u=preview(.8);const t=$('txt').value.trim(),c=getCart();
+ c.push({id:'custom-'+Date.now(),name:`Custom Resin Art (${labels[$('shape').value]}${t?' - '+t:''})`,price:total,img:u,qty:1,
+  note:$('note').value.trim(),refs:refs.slice(),pack:packInfo()[2],flowers:flowerList(),stickers:stickerList()});
+ try{localStorage.setItem(CART,JSON.stringify(c))}catch(e){toast('Cart is full. Remove an item or a reference picture and try again.');return}
+ cartCount();toast('Your custom design was added to cart')};
+
+syncShapeCards();drawBase();cartCount();recalc();
+/* ---------- initial history snapshot ---------- */
+setTimeout(()=>{ if(!hist.length){ syncShapeCards(); snap(); recalc(); } },0);
+
+</script>
+</body>
+</html>

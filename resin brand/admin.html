@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saubhagya Resin – Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f8f9fb;font-family:'Poppins',system-ui,sans-serif;color:#2c3e50}
+.wrap{max-width:1100px;margin:0 auto;padding:30px 16px}
+h1{font-size:26px;margin:0 0 4px}
+h3{margin:0 0 10px}
+.sub{color:#8a94a0;font-size:14px;margin:0 0 20px}
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+input,select,textarea{padding:12px 14px;border:1px solid #cfd4da;border-radius:8px;font:400 15px 'Poppins',sans-serif;outline:none;background:#fff}
+input:focus,select:focus,textarea:focus{border:1px solid #e6a11a}
+select.status{padding:7px 10px;font-size:13px}
+button{padding:10px 16px;border:0;border-radius:6px;background:#222;color:#fff;font:500 14px 'Poppins',sans-serif;cursor:pointer}
+button.pink{background:#e91e63}
+button.light{background:#fff;color:#222;border:1px solid #cfd4da;padding:6px 12px;font-size:13px}
+button.danger{background:#fff;color:#c62828;border:1px solid #e5b3b3;padding:6px 12px;font-size:13px}
+button:disabled{opacity:.6;cursor:not-allowed}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.bar input{flex:1;min-width:180px}
+.stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat div{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 12px rgba(0,0,0,.05);min-width:140px}
+.stat b{display:block;font-size:24px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs button{background:#fff;color:#222;border:1px solid #cfd4da}
+.tabs button.active{background:#222;color:#fff;border-color:#222}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #eceff2;vertical-align:top}
+td.nw,th{white-space:nowrap}
+th{color:#8a94a0;font-weight:500;font-size:12px;text-transform:uppercase}
+.err{color:#c62828;font-size:14px;min-height:20px;margin-top:8px}
+.note{background:#e8f6ee;border:1px solid #a9dcbc;border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px}
+.hide{display:none}
+.detail{margin-top:16px;border:2px solid #e91e63}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:14px;margin-bottom:16px}
+.kv span:nth-child(odd){color:#8a94a0}
+.order{border:1px solid #eceff2;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:14px}
+.order .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:500;margin-bottom:6px}
+.tag{background:#e6f6ec;color:#1b8a4b;border-radius:20px;padding:2px 10px;font-size:12px}
+.muted{color:#8a94a0}
+.coupon{color:#1b8a4b;font-size:12px}
+.pinput{width:100px;padding:7px 10px;font-size:13px}
+
+/* product form */
+.pform{margin-bottom:20px;border:2px solid #e91e63}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid .full{grid-column:1/-1}
+.grid label{display:block;font-size:12px;color:#8a94a0;margin-bottom:4px;font-weight:500}
+.grid input,.grid select,.grid textarea{width:100%}
+.grid textarea{min-height:90px;resize:vertical}
+.finalbox{background:#f4f6f8;border-radius:8px;padding:12px 14px;font-size:14px;display:flex;align-items:center;gap:8px;min-height:48px}
+.finalbox b{font-size:18px;color:#1b8a4b}
+.photo{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.preview{width:90px;height:90px;border-radius:10px;border:1px dashed #cfd4da;background:#f4f6f8 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#8a94a0;font-size:11px;text-align:center}
+.thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;background:#f4f6f8;border:1px solid #eceff2}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.cut{text-decoration:line-through;color:#8a94a0;font-size:12px}
+.off{color:#e91e63;font-size:12px;font-weight:500}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Admin login -->
+  <div id="lock" class="card" style="max-width:380px;margin:60px auto">
+    <h1>Admin Login</h1>
+    <p class="sub">Saubhagya Resin</p>
+    <input id="pass" type="password" placeholder="Admin key" autocomplete="off" style="width:100%;margin-bottom:12px">
+    <button id="enter" class="pink" style="width:100%">Enter</button>
+    <div id="lockErr" class="err"></div>
+  </div>
+
+  <!-- Admin panel -->
+  <div id="panel" class="hide">
+    <h1>Admin Panel</h1>
+    <p class="sub">Customers, orders and products from your online database</p>
+
+    <div class="note">
+      This shows <b>all customers and orders saved on the server</b> (saubhagya.db), from every phone and browser.
+    </div>
+
+    <div class="stat">
+      <div><b id="sCustomers">0</b>Customers</div>
+      <div><b id="sOrders">0</b>Orders</div>
+      <div><b id="sNew">0</b>New orders</div>
+      <div><b id="sSales">₹0</b>Total order value</div>
+    </div>
+
+    <div class="tabs">
+      <button id="tabCustomers" class="active">Customers</button>
+      <button id="tabOrders">Orders</button>
+      <button id="tabProducts">Products</button>
+      <button id="tabPayments">Payments</button>
+    </div>
+
+    <div class="bar">
+      <input id="search" placeholder="Search name, email, phone, order ID or product">
+      <select id="statusFilter" class="status"></select>
+      <button id="refresh" class="light">Refresh</button>
+      <button id="csv">Download CSV</button>
+      <button id="logout">Admin Log Out</button>
+    </div>
+
+    <!-- Customers -->
+    <div id="viewCustomers">
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Spent</th><th>Joined</th><th></th></tr></thead>
+          <tbody id="custRows"></tbody>
+        </table>
+        <p id="custEmpty" class="sub hide" style="margin:16px 0 0">No customers found.</p>
+      </div>
+      <div id="detail" class="card detail hide"></div>
+    </div>
+
+    <!-- Orders -->
+    <div id="viewOrders" class="hide">
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody id="orderRows"></tbody>
+        </table>
+        <p id="orderEmpty" class="sub hide" style="margin:16px 0 0">No orders yet.</p>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div id="viewProducts" class="hide">
+      <div class="note" style="background:#fff8e6;border-color:#f0d58a">
+        Every product customers can buy must be listed here. The <b>name must match the product name on your website exactly</b>. Orders for products not listed here (or switched off) are rejected.
+      </div>
+
+      <!-- Add / Edit product form -->
+      <div class="card pform">
+        <h3 id="formTitle">Add new product</h3>
+        <div class="grid">
+          <div class="full">
+            <label for="pName">Product name *</label>
+            <input type="text" id="pName" placeholder="Product name (exactly as on the website)">
+          </div>
+          <div>
+            <label for="pCat">Category *</label>
+            <input type="text" id="pCat" list="catList" placeholder="e.g. Resin Art" autocomplete="off">
+            <datalist id="catList"></datalist>
+          </div>
+          <div>
+            <label for="pSub">Sub category</label>
+            <input type="text" id="pSub" list="subList" placeholder="e.g. Keychains" autocomplete="off">
+            <datalist id="subList"></datalist>
+          </div>
+          <div>
+            <label for="pPrice">Price (₹) *</label>
+            <input type="number" id="pPrice" placeholder="e.g. 499" min="1">
+          </div>
+          <div>
+            <label for="pDisc">Discount (%)</label>
+            <input type="number" id="pDisc" placeholder="e.g. 10" min="0" max="90" value="0">
+          </div>
+          <div class="full">
+            <label>Final selling price</label>
+            <div class="finalbox"><span id="finalPrice"><b>₹0</b></span></div>
+          </div>
+          <div class="full">
+            <label for="pDesc">Description</label>
+            <textarea id="pDesc" placeholder="Product details, size, material, care instructions..."></textarea>
+          </div>
+          <div class="full">
+            <label for="pPhoto">Product photo (JPG / PNG / WEBP, max 3 MB)</label>
+            <div class="photo">
+              <div id="preview" class="preview">No photo</div>
+              <input type="file" id="pPhoto" accept="image/jpeg,image/png,image/webp" style="padding:8px">
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="pAdd" class="pink">Add product</button>
+          <button id="pCancel" class="light hide">Cancel edit</button>
+        </div>
+        <div id="pErr" class="err"></div>
+      </div>
+
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>Price (₹)</th><th>Discount %</th><th>Final</th><th>On sale</th><th></th></tr></thead>
+          <tbody id="prodRows"></tbody>
+        </table>
+        <p id="prodEmpty" class="sub hide" style="margin:16px 0 0">No products yet.</p>
+      </div>
+    </div>
+
+    <!-- Payments (customers submit their UPI reference number; you check your UPI app, then approve) -->
+    <div id="viewPayments" class="hide">
+      <div class="note" style="background:#fff8e6;border-color:#f0d58a">
+        Customers pay by UPI and send you the 12-digit reference number (UTR). <b>Check the amount and UTR in your own UPI / bank app first</b>, then press Approve. Approving moves the order to "Payment Received".
+        <div id="payPending" style="margin-top:6px;font-weight:600;color:#c62828"></div>
+      </div>
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>Date</th><th>Order</th><th>Customer</th><th>Amount</th><th>Method</th><th>UTR / Note</th><th>Status</th><th></th></tr></thead>
+          <tbody id="payRows"></tbody>
+        </table>
+        <p id="payEmpty" class="sub hide" style="margin:16px 0 0">No payments yet.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // The admin key is the ADMIN_KEY you set in server.js. It is checked by the server, not in this page.
+  // must match the STATUSES list in server.js
+  var STATUSES=['Pending Confirmation','Customization Confirmed','Payment Pending','Payment Received','In Production','Ready for Delivery','Delivered','Cancelled'];
+  var API=location.protocol==='file:'?'http://localhost:3000':'';
+  var KEY_STORE='sr_adminkey';
+  var MAX_PHOTO=3*1024*1024;
+  var $=function(id){return document.getElementById(id)};
+  var tab='customers', openId=null, editId=null, previewUrl=null;
+  var users=[], orders=[], products=[], payments=[];
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function parseDate(s){var d=new Date(String(s).replace(' ','T')+'Z');return isNaN(d)?null:d}
+  function fmt(s){var d=parseDate(s);return d?d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''}
+  function rs(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+  function itemsOf(o){try{return JSON.parse(o.items)||[]}catch(e){return []}}
+  function itemsText(o){return itemsOf(o).map(function(i){return i.name+' ×'+(i.qty||1)}).join(', ')}
+  function getKey(){try{return sessionStorage.getItem(KEY_STORE)||''}catch(e){return ''}}
+  function finalOf(price,disc){price=Number(price)||0;disc=Number(disc)||0;return Math.round(price-price*disc/100)}
+  function imgSrc(p){return p&&p.image?(/^https?:/.test(p.image)?p.image:API+p.image):''}
+
+  function api(path,opts){
+    opts=opts||{};
+    var h={'x-admin-key':getKey()};
+    // FormData (photo upload) must set its own multipart Content-Type
+    if(!(opts.body instanceof FormData)) h['Content-Type']='application/json';
+    opts.headers=Object.assign(h,opts.headers||{});
+    return fetch(API+path,opts).then(function(r){return r.json().catch(function(){return {}}).then(function(d){return {status:r.status,d:d}})});
+  }
+
+  // ---------- load from the server ----------
+  function loadData(){
+    return Promise.all([api('/api/admin/users'),api('/api/admin/orders'),api('/api/admin/products'),api('/api/admin/payments')]).then(function(res){
+      if(res[0].status===403||res[1].status===403) return 'denied';
+      users=Array.isArray(res[0].d)?res[0].d:[];
+      orders=Array.isArray(res[1].d)?res[1].d:[];
+      products=Array.isArray(res[2].d)?res[2].d:[];
+      payments=Array.isArray(res[3].d)?res[3].d:[];
+      return 'ok';
+    });
+  }
+
+  function ordersOf(uid){return orders.filter(function(o){return Number(o.user_id)===Number(uid)})}
+  function userOf(uid){return users.find(function(u){return Number(u.id)===Number(uid)})}
+
+  function render(){
+    var q=$('search').value.trim().toLowerCase(), sf=$('statusFilter').value;
+    var sales=orders.filter(function(o){return o.status!=='Cancelled'}).reduce(function(a,o){return a+(o.total||0)},0);
+    $('sCustomers').textContent=users.length;
+    $('sOrders').textContent=orders.length;
+    $('sNew').textContent=orders.filter(function(o){return (o.status||'Pending Confirmation')==='Pending Confirmation'}).length;
+    $('sSales').textContent=rs(sales);
+
+    // Customers table
+    var list=users.filter(function(u){
+      var mine=ordersOf(u.id), phone=u.phone||(mine.length?mine[mine.length-1].phone:'');
+      return !q||[u.name,u.email,phone].join(' ').toLowerCase().indexOf(q)>-1;
+    });
+    $('custRows').innerHTML=list.map(function(u,i){
+      var mine=ordersOf(u.id);
+      var spent=mine.filter(function(o){return o.status!=='Cancelled'}).reduce(function(a,o){return a+(o.total||0)},0);
+      var phone=u.phone||(mine.length?mine[mine.length-1].phone:'—');
+      return '<tr><td>'+(i+1)+'</td><td>'+esc(u.name)+'</td><td>'+esc(u.email||'—')+'</td><td class="nw">'+esc(phone)+'</td>'+
+        '<td>'+mine.length+'</td><td class="nw">'+rs(spent)+'</td><td class="nw">'+fmt(u.created_at)+'</td>'+
+        '<td class="nw"><button class="light" data-view="'+esc(u.id)+'">View</button></td></tr>';
+    }).join('');
+    $('custEmpty').classList.toggle('hide',list.length>0);
+
+    // Orders table
+    var ol=orders.slice().sort(function(a,b){return b.id-a.id}).filter(function(o){
+      if(sf!=='All'&&(o.status||'Pending Confirmation')!==sf)return false;
+      var u=userOf(o.user_id);
+      return !q||['#'+o.id,o.id,o.name,o.phone,o.address,u?u.email:''].join(' ').toLowerCase().indexOf(q)>-1;
+    });
+    $('orderRows').innerHTML=ol.map(function(o){
+      var u=userOf(o.user_id), st=o.status||'Pending Confirmation';
+      return '<tr><td class="nw"><b>#'+esc(o.id)+'</b></td><td class="nw">'+fmt(o.created_at)+'</td>'+
+        '<td>'+esc(o.name)+'<br><span class="muted">'+esc(u?(u.email||u.phone||''):'')+'</span></td><td class="nw">'+esc(o.phone)+'</td>'+
+        '<td style="min-width:200px">'+esc(o.address)+' – '+esc(o.pincode)+'</td><td style="min-width:200px">'+esc(itemsText(o))+'</td>'+
+        '<td class="nw"><b>'+rs(o.total)+'</b>'+(o.coupon?'<br><span class="coupon">'+esc(o.coupon)+' (-'+rs(o.discount)+')</span>':'')+'</td>'+
+        '<td><select class="status" data-oid="'+esc(o.id)+'">'+STATUSES.map(function(s){return '<option'+(s===st?' selected':'')+'>'+s+'</option>'}).join('')+'</select><br><button class="light" style="margin-top:6px" data-markpaid="'+esc(o.id)+'">Mark paid</button></td></tr>';
+    }).join('');
+    $('orderEmpty').classList.toggle('hide',ol.length>0);
+    renderProducts();
+    renderPayments();
+
+    // Customer detail
+    var d=$('detail');
+    var cu=openId!=null&&userOf(openId);
+    if(cu){
+      var mine=ordersOf(cu.id).slice().reverse();
+      var last=mine[0];
+      d.classList.remove('hide');
+      d.innerHTML='<h3>'+esc(cu.name)+'</h3>'+
+        '<div class="kv"><span>Email</span><span>'+esc(cu.email||'—')+'</span>'+
+        '<span>Phone</span><span>'+esc(cu.phone||(last?last.phone:'Not added yet'))+'</span>'+
+        '<span>Address</span><span>'+esc(last?last.address+' – '+last.pincode:'Not added yet')+'</span>'+
+        '<span>Joined</span><span>'+fmt(cu.created_at)+'</span></div>'+
+        '<h3>Order history ('+mine.length+')</h3>'+
+        (mine.length?mine.map(function(o){
+          return '<div class="order"><div class="top"><span>#'+esc(o.id)+' <span class="tag">'+esc(o.status||'Pending Confirmation')+'</span></span><span>'+fmt(o.created_at)+'</span><span>'+rs(o.total)+'</span></div>'+
+            '<div>'+itemsOf(o).map(function(i){return esc(i.name)+' × '+(i.qty||1)+' — '+rs(i.price*(i.qty||1))}).join('<br>')+'</div>'+
+            '<div class="muted" style="margin-top:6px">Delivery to: '+esc(o.address)+' – '+esc(o.pincode)+' · '+esc(o.phone)+'</div></div>';
+        }).join(''):'<p class="muted">No orders yet.</p>')+
+        '<button class="light" id="closeDetail">Close</button>';
+      $('closeDetail').onclick=function(){openId=null;render()};
+    } else d.classList.add('hide');
+
+    document.querySelectorAll('[data-view]').forEach(function(b){
+      b.onclick=function(){openId=b.getAttribute('data-view');render();$('detail').scrollIntoView({behavior:'smooth'})};
+    });
+  }
+
+  // ---------- change order status (saved on the server) ----------
+  $('orderRows').addEventListener('change',function(e){
+    var sel=e.target.closest('select[data-oid]'); if(!sel)return;
+    var id=sel.getAttribute('data-oid'), status=sel.value;
+    api('/api/admin/orders/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:status})}).then(function(r){
+      if(r.status!==200){alert(r.d.error||'Could not update the status.');refresh();return}
+      orders.forEach(function(o){if(String(o.id)===String(id))o.status=status});
+      render();
+    }).catch(function(){alert('Cannot reach the server.');});
+  });
+
+  // ---------- products ----------
+  function fillLists(){
+    var cats={}, subs={}, c=$('pCat').value.trim().toLowerCase();
+    products.forEach(function(p){
+      if(p.category) cats[p.category]=1;
+      if(p.sub_category && (!c || String(p.category||'').toLowerCase()===c)) subs[p.sub_category]=1;
+    });
+    $('catList').innerHTML=Object.keys(cats).map(function(x){return '<option value="'+esc(x)+'">'}).join('');
+    $('subList').innerHTML=Object.keys(subs).map(function(x){return '<option value="'+esc(x)+'">'}).join('');
+  }
+
+  function renderProducts(){
+    var qv=$('search').value.trim().toLowerCase();
+    var list=products.filter(function(p){
+      return !qv||[p.name,p.category,p.sub_category].join(' ').toLowerCase().indexOf(qv)>-1;
+    });
+    $('prodRows').innerHTML=list.map(function(p){
+      var disc=Number(p.discount)||0, fin=finalOf(p.price,disc);
+      var src=imgSrc(p);
+      return '<tr>'+
+        '<td>'+(src?'<img class="thumb" src="'+esc(src)+'" alt="">':'<div class="thumb"></div>')+'</td>'+
+        '<td>'+esc(p.name)+(p.description?'<br><span class="muted" style="font-size:12px">'+esc(String(p.description).slice(0,60))+(String(p.description).length>60?'…':'')+'</span>':'')+'</td>'+
+        '<td>'+esc(p.category||'—')+(p.sub_category?'<br><span class="muted" style="font-size:12px">'+esc(p.sub_category)+'</span>':'')+'</td>'+
+        '<td><input type="number" min="1" class="pinput" data-price="'+p.id+'" value="'+esc(p.price)+'"></td>'+
+        '<td><input type="number" min="0" max="90" class="pinput" style="width:80px" data-disc="'+p.id+'" value="'+esc(disc)+'"></td>'+
+        '<td class="nw"><b>'+rs(fin)+'</b>'+(disc?'<br><span class="cut">'+rs(p.price)+'</span> <span class="off">'+disc+'% off</span>':'')+'</td>'+
+        '<td><input type="checkbox" data-active="'+p.id+'"'+(p.active?' checked':'')+'></td>'+
+        '<td class="nw"><button class="light" data-save="'+p.id+'">Save</button> '+
+        '<button class="light" data-edit="'+p.id+'">Edit</button> '+
+        '<button class="danger" data-del="'+p.id+'">Delete</button></td></tr>';
+    }).join('');
+    $('prodEmpty').classList.toggle('hide',list.length>0);
+    fillLists();
+  }
+
+  // quick save of price / discount / on-sale from the table
+  $('prodRows').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+
+    if(b.hasAttribute('data-save')){
+      var id=b.getAttribute('data-save');
+      var price=document.querySelector('[data-price="'+id+'"]').value;
+      var disc=document.querySelector('[data-disc="'+id+'"]').value;
+      var active=document.querySelector('[data-active="'+id+'"]').checked;
+      api('/api/admin/products/'+id,{method:'PATCH',body:JSON.stringify({price:Number(price),discount:Number(disc)||0,active:active})}).then(function(r){
+        if(r.status!==200){alert(r.d.error||'Could not save.');return}
+        b.textContent='Saved ✓'; setTimeout(function(){b.textContent='Save'},1200); refresh();
+      });
+    }
+    else if(b.hasAttribute('data-edit')){
+      var p=products.find(function(x){return String(x.id)===b.getAttribute('data-edit')}); if(!p)return;
+      startEdit(p);
+    }
+    else if(b.hasAttribute('data-del')){
+      var pid=b.getAttribute('data-del');
+      var pr=products.find(function(x){return String(x.id)===pid});
+      if(!confirm('Delete "'+(pr?pr.name:'this product')+'"? This cannot be undone.'))return;
+      api('/api/admin/products/'+pid,{method:'DELETE'}).then(function(r){
+        if(r.status!==200){alert(r.d.error||'Could not delete.');return}
+        if(String(editId)===String(pid)) resetForm();
+        refresh();
+      });
+    }
+  });
+
+  // ----- add / edit form -----
+  function updateFinal(){
+    var price=Number($('pPrice').value)||0, disc=Math.min(90,Math.max(0,Number($('pDisc').value)||0));
+    var fin=finalOf(price,disc);
+    $('finalPrice').innerHTML='<b>'+rs(fin)+'</b>'+(disc?' <span class="cut">'+rs(price)+'</span> <span class="off">'+disc+'% off</span>':'');
+  }
+  function setPreview(src){
+    var pv=$('preview');
+    if(src){pv.style.backgroundImage='url("'+src+'")';pv.textContent=''}
+    else{pv.style.backgroundImage='';pv.textContent='No photo'}
+  }
+  function resetForm(){
+    editId=null;
+    ['pName','pCat','pSub','pPrice','pDesc'].forEach(function(id){$(id).value=''});
+    $('pDisc').value='0'; $('pPhoto').value='';
+    if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null}
+    setPreview('');
+    $('formTitle').textContent='Add new product';
+    $('pAdd').textContent='Add product';
+    $('pCancel').classList.add('hide');
+    $('pErr').textContent='';
+    updateFinal();
+  }
+  function startEdit(p){
+    editId=p.id;
+    $('pName').value=p.name||''; $('pCat').value=p.category||''; $('pSub').value=p.sub_category||'';
+    $('pPrice').value=p.price||''; $('pDisc').value=p.discount||0; $('pDesc').value=p.description||'';
+    $('pPhoto').value=''; setPreview(imgSrc(p));
+    $('formTitle').textContent='Edit product';
+    $('pAdd').textContent='Save changes';
+    $('pCancel').classList.remove('hide');
+    $('pErr').textContent='';
+    updateFinal(); fillLists();
+    $('pName').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  $('pPrice').addEventListener('input',updateFinal);
+  $('pDisc').addEventListener('input',updateFinal);
+  $('pCat').addEventListener('input',fillLists);
+  $('pCancel').onclick=resetForm;
+
+  $('pPhoto').addEventListener('change',function(){
+    var f=this.files[0];
+    if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null}
+    if(!f){setPreview('');return}
+    if(!/^image\/(jpeg|png|webp)$/.test(f.type)){$('pErr').textContent='Only JPG, PNG or WEBP photos are allowed.';this.value='';setPreview('');return}
+    if(f.size>MAX_PHOTO){$('pErr').textContent='Photo is too large. Maximum 3 MB.';this.value='';setPreview('');return}
+    $('pErr').textContent='';
+    previewUrl=URL.createObjectURL(f); setPreview(previewUrl);
+  });
+
+  $('pAdd').onclick=function(){
+    var name=$('pName').value.trim(), cat=$('pCat').value.trim(), sub=$('pSub').value.trim();
+    var price=Number($('pPrice').value), disc=Number($('pDisc').value)||0, desc=$('pDesc').value.trim();
+    var file=$('pPhoto').files[0];
+
+    if(!name){$('pErr').textContent='Please enter the product name.';return}
+    if(!cat){$('pErr').textContent='Please enter a category.';return}
+    if(!(price>0)){$('pErr').textContent='Please enter a valid price.';return}
+    if(disc<0||disc>90){$('pErr').textContent='Discount must be between 0 and 90%.';return}
+    if(!editId && !file){$('pErr').textContent='Please add a product photo.';return}
+
+    var fd=new FormData();
+    fd.append('name',name); fd.append('category',cat); fd.append('sub_category',sub);
+    fd.append('price',price); fd.append('discount',disc); fd.append('description',desc);
+    if(file) fd.append('photo',file);
+
+    var btn=$('pAdd'), old=btn.textContent;
+    btn.disabled=true; btn.textContent='Saving…'; $('pErr').textContent='';
+
+    api(editId?'/api/admin/products/'+editId:'/api/admin/products',{method:editId?'PUT':'POST',body:fd}).then(function(r){
+      btn.disabled=false; btn.textContent=old;
+      if(r.status!==200){$('pErr').textContent=r.d.error||'Could not save the product.';return}
+      resetForm(); refresh();
+    }).catch(function(){
+      btn.disabled=false; btn.textContent=old;
+      $('pErr').textContent='Cannot reach the server.';
+    });
+  };
+
+  function setTab(t){
+    tab=t;
+    $('tabCustomers').classList.toggle('active',t==='customers');
+    $('tabOrders').classList.toggle('active',t==='orders');
+    $('tabProducts').classList.toggle('active',t==='products');
+    $('tabPayments').classList.toggle('active',t==='payments');
+    $('viewCustomers').classList.toggle('hide',t!=='customers');
+    $('viewOrders').classList.toggle('hide',t!=='orders');
+    $('viewProducts').classList.toggle('hide',t!=='products');
+    $('viewPayments').classList.toggle('hide',t!=='payments');
+    $('statusFilter').classList.toggle('hide',t!=='orders');
+  }
+
+  function q(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"'}
+  function csv(){
+    var lines,name;
+    if(tab==='products'){
+      lines=['Name,Category,Sub category,Price,Discount %,Final price,Description,Photo,On sale'].concat(products.map(function(p){
+        return [p.name,p.category,p.sub_category,p.price,p.discount||0,finalOf(p.price,p.discount),p.description,p.image,p.active?'yes':'no'].map(q).join(',');
+      }));
+      name='saubhagya-products.csv';
+    } else if(tab==='customers'){
+      lines=['Name,Email,Phone,Orders,Spent,Joined'].concat(users.map(function(u){
+        var mine=ordersOf(u.id);
+        var spent=mine.filter(function(o){return o.status!=='Cancelled'}).reduce(function(a,o){return a+(o.total||0)},0);
+        return [u.name,u.email,mine.length?mine[mine.length-1].phone:'',mine.length,spent,u.created_at].map(q).join(',');
+      }));
+      name='saubhagya-customers.csv';
+    } else {
+      lines=['Order ID,Date,Name,Phone,Address,Pincode,Items,Subtotal,Discount,Total,Coupon,Status'].concat(orders.map(function(o){
+        return [o.id,o.created_at,o.name,o.phone,o.address,o.pincode,itemsText(o),o.subtotal,o.discount,o.total,o.coupon,o.status||'Pending Confirmation'].map(q).join(',');
+      }));
+      name='saubhagya-orders.csv';
+    }
+    var blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+  }
+
+  function showPanel(){ $('lock').classList.add('hide'); $('panel').classList.remove('hide'); render(); }
+  function lock(msg){
+    try{sessionStorage.removeItem(KEY_STORE)}catch(e){}
+    $('panel').classList.add('hide'); $('lock').classList.remove('hide'); $('pass').value='';
+    $('lockErr').textContent=msg||'';
+  }
+  function refresh(){
+    return loadData().then(function(s){ if(s==='denied') lock('Wrong admin key.'); else showPanel(); })
+      .catch(function(){ $('lockErr').textContent='Cannot reach the server. Run "node server.js" and open http://localhost:3000/admin.html'; });
+  }
+
+  $('enter').onclick=function(){
+    try{sessionStorage.setItem(KEY_STORE,$('pass').value)}catch(e){}
+    $('lockErr').textContent='';
+    refresh();
+  };
+  $('pass').addEventListener('keydown',function(e){if(e.key==='Enter')$('enter').click()});
+  $('search').addEventListener('input',render);
+  $('statusFilter').addEventListener('change',render);
+  $('tabCustomers').onclick=function(){setTab('customers')};
+  $('tabOrders').onclick=function(){setTab('orders')};
+  $('tabProducts').onclick=function(){setTab('products')};
+  $('tabPayments').onclick=function(){setTab('payments')};
+
+  // ---------- payments ----------
+  var PAY_LABEL={pending_verification:'Waiting for check',paid:'Paid',rejected:'Rejected'};
+  function renderPayments(){
+    var qv=$('search').value.trim().toLowerCase();
+    var list=payments.filter(function(p){return !qv||[p.order_id,p.customer,p.phone,p.utr].join(' ').toLowerCase().indexOf(qv)>-1});
+    var waiting=payments.filter(function(p){return p.status==='pending_verification'}).length;
+    $('payPending').textContent=waiting?(waiting+' payment(s) waiting for your check'):'';
+    $('payRows').innerHTML=list.map(function(p){
+      var act=p.status==='pending_verification'
+        ?'<button class="light" data-pay="approve" data-pid="'+p.id+'">Approve</button> <button class="danger" data-pay="reject" data-pid="'+p.id+'">Reject</button>':'';
+      var warn=Number(p.amount)!==Number(p.order_total)?'<br><span class="muted">order total '+rs(p.order_total)+'</span>':'';
+      return '<tr><td class="nw">'+fmt(p.created_at)+'</td><td class="nw"><b>#'+esc(p.order_id)+'</b></td>'+
+        '<td>'+esc(p.customer)+'<br><span class="muted">'+esc(p.phone)+'</span></td>'+
+        '<td class="nw"><b>'+rs(p.amount)+'</b>'+warn+'</td><td class="nw">'+(p.method==='upi'?'UPI':'Manual')+'</td>'+
+        '<td class="nw">'+esc(p.utr||p.note||'—')+'</td><td class="nw">'+esc(PAY_LABEL[p.status]||p.status)+'</td>'+
+        '<td class="nw">'+act+'</td></tr>';
+    }).join('');
+    $('payEmpty').classList.toggle('hide',list.length>0);
+  }
+  $('payRows').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-pay]'); if(!b)return;
+    var id=b.getAttribute('data-pid'), action=b.getAttribute('data-pay'), note='';
+    if(action==='approve'&&!confirm('Approve this payment? Confirm that you received the amount and the UTR matches in your UPI / bank app.'))return;
+    if(action==='reject'){note=prompt('Reason for rejecting (optional):')||''; }
+    api('/api/admin/payments/'+id,{method:'PATCH',body:JSON.stringify({action:action,note:note})}).then(function(r){
+      if(r.status!==200){alert(r.d.error||'Could not update the payment.');return}
+      refresh();
+    }).catch(function(){alert('Cannot reach the server.');});
+  });
+  // record money you received outside the website (cash, bank transfer, UPI on WhatsApp)
+  $('orderRows').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-markpaid]'); if(!b)return;
+    var id=b.getAttribute('data-markpaid');
+    if(!confirm('Mark order #'+id+' as PAID? Do this only if you have received the full amount.'))return;
+    api('/api/admin/orders/'+id+'/mark-paid',{method:'POST',body:JSON.stringify({note:'Marked paid by admin'})}).then(function(r){
+      if(r.status!==200){alert(r.d.error||'Could not mark as paid.');return}
+      refresh();
+    }).catch(function(){alert('Cannot reach the server.');});
+  });
+  $('refresh').onclick=refresh;
+  $('csv').onclick=csv;
+  $('logout').onclick=function(){lock('')};
+
+  $('statusFilter').innerHTML=['All'].concat(STATUSES).map(function(s){return '<option>'+s+'</option>'}).join('');
+  setTab('customers');
+  updateFinal();
+  if(getKey()) refresh();
+})();
+</script>
+</body>
+</html>

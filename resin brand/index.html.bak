@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resin Art Store - Saubhagya</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* SCROLLING OFFER BAR */
+        .offer-bar { background: #000; overflow: hidden; white-space: nowrap; position: relative; width: 100%; }
+        .offer-bar-track { display: inline-flex; animation: scroll-offer 18s linear infinite; }
+        .offer-bar-track span { padding: 10px 40px; color: #fff; font-weight: 600; font-size: 14px; white-space: nowrap; }
+        /* highlight the free shipping line */
+        .offer-bar-track span.highlight { color: #f5b400; }
+        @keyframes scroll-offer { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        /* pause on hover */
+        .offer-bar:hover .offer-bar-track { animation-play-state: paused; }
+
+        /* CENTERED, LARGER LOGO */
+        .nav-top { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .logo { width: 100%; display: flex; justify-content: center; margin-bottom: 10px; }
+        .logo img { height: 90px; width: auto; }
+        .main-menu { display: flex; justify-content: center; gap: 30px; }
+
+        /* SECONDARY MENU + DROPDOWN */
+        .secondary-menu { display: flex; align-items: center; justify-content: center; gap: 40px; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.12); padding: 20px; gap: 20px; z-index: 50; border-radius: 6px; }
+        .dropdown:hover .dropdown-content { display: flex; }
+        .dropdown-content a { display: flex; flex-direction: column; align-items: center; width: 110px; text-decoration: none; color: #333; font-size: 12px; font-weight: 500; }
+        .dropdown-content a img { width: 90px; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
+
+        /* FLOATING CONTACT PANEL - bottom right corner */
+        .contact-panel { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 999; }
+        .contact-panel-details { display: none; flex-direction: column; gap: 6px; background: #fff; padding: 14px 18px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); font-size: 13px; font-weight: 500; color: #333; white-space: nowrap; }
+        .contact-panel.open .contact-panel-details { display: flex; }
+        .whatsapp-fab { width: 52px; height: 52px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.25); transition: transform 0.2s ease; }
+        .whatsapp-fab:hover { transform: scale(1.1); }
+
+        /* ===== NEW: HERO BANNER + PRODUCT HOVER ===== */
+        .sr-videos{padding:30px 5vw;background:#0d1b2a}
+        .sr-vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:1100px;margin:0 auto}
+        .sr-vgrid figure{position:relative;margin:0;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:#1b2f45;display:flex;align-items:center;justify-content:center;color:#9fb3c8;font-family:'Montserrat',sans-serif;font-size:13px;text-align:center}
+        .sr-vgrid video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .sr-vgrid figure:has(video) figcaption{display:none}
+        .sr-snd{position:absolute;right:10px;bottom:10px;z-index:3;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:19px;cursor:pointer;backdrop-filter:blur(4px);transition:background .2s}
+        .sr-snd:hover{background:#f5b400}
+        .sr-vgrid video{cursor:pointer}
+        .product-card{transition:transform .2s ease,box-shadow .2s ease}
+        .product-card:hover{transform:translateY(-6px);box-shadow:0 12px 26px rgba(0,0,0,.12)}
+
+        /* ===== NEW: ACHIEVEMENTS + INSTAGRAM VIDEO ===== */
+        .sr-sec{padding:60px 5vw;font-family:'Montserrat',sans-serif;text-align:center}
+        .sr-sec h2{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;margin:0 0 6px}
+        .sr-widget{max-width:1200px;margin:0 auto;padding:0 20px 10px;background:#fff;border-radius:16px}
+        .sr-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:1100px;margin:36px auto 0}
+        .sr-gallery figure{position:relative;margin:0;aspect-ratio:4/3;border:2px dashed #ccc;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;color:#999;font-size:13px}
+        .sr-gallery img,.sr-gallery video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .sr-gallery figure:has(img),.sr-gallery figure:has(video){border:0}
+        .sr-gallery figure:has(img) figcaption,.sr-gallery figure:has(video) figcaption{display:none}
+        .sr-sub{color:#666;margin:0 0 30px;font-size:14px}
+        .sr-nums{display:flex;flex-wrap:wrap;gap:30px;justify-content:center}
+        .sr-nums div{min-width:140px;font-size:13px;color:#555}
+        .sr-nums b{display:block;font-size:clamp(2rem,5vw,3rem);font-weight:800;color:#000}
+        .sr-awards{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px}
+        .sr-awards span{padding:8px 18px;border-radius:50px;background:#fff7dc;border:1px solid #f5b400;font-size:13px;font-weight:600}
+        .sr-ig{background:#fafafa}
+        .sr-ig iframe{border:0;max-width:100%;border-radius:12px}
+        .sr-ig a{display:inline-block;margin-top:16px;color:#000;font-weight:600}
+
+        /* remove extra blank space between products and features */
+        .products{padding-bottom:20px !important;margin-bottom:0 !important}
+        .features{margin-top:0 !important}
+
+        /* ===== VISION & MISSION ===== */
+        .sr-vm{padding:60px 5vw;background:#fff;font-family:'Montserrat',sans-serif}
+        .sr-vm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto;justify-content:center}
+        @media(max-width:900px){.sr-vm-grid{grid-template-columns:1fr}}
+        .sr-vm-card .ico,.sr-vm-card h2{text-align:center}
+        .sr-vm-card{background:#fafafa;border:1px solid #eee;border-top:4px solid #f5b400;border-radius:14px;padding:28px;text-align:left;transition:transform .2s,box-shadow .2s}
+        .sr-vm-card:hover{transform:translateY(-5px);box-shadow:0 12px 26px rgba(0,0,0,.1)}
+        .sr-vm-card .ico{font-size:34px;margin-bottom:8px}
+        .sr-vm-card h2{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:800;margin:0 0 12px}
+        .sr-vm-card p{font-size:14px;line-height:1.7;color:#444;margin:0 0 10px}
+        .sr-vm-card ul{margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#444}
+        .sr-ig-card{grid-column:1/-1;display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border-radius:14px;padding:24px 28px;text-decoration:none;transition:transform .2s,box-shadow .2s}
+        .sr-ig-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,0,0,.22)}
+        .sr-ig-card svg{flex-shrink:0}
+        .sr-ig-card div{flex:1;min-width:220px;text-align:left}
+        .sr-ig-card h3{margin:0 0 6px;font-size:1.15rem;font-weight:800}
+        .sr-ig-card p{margin:0;font-size:14px;line-height:1.6}
+        .sr-ig-btn{background:#fff;color:#000;padding:10px 20px;border-radius:50px;font-weight:700;font-size:13px;white-space:nowrap}
+        /* NEW: both Instagram buttons below the banner */
+        .sr-ig-row{grid-column:1/-1;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+        .sr-hl{max-width:760px;margin:0 auto 30px;background:#fff7dc;border:1px solid #f5b400;border-radius:16px;padding:28px}
+        .sr-hl-num{font-size:clamp(2.5rem,7vw,4rem);font-weight:800;color:#000;line-height:1}
+        .sr-hl h3{margin:6px 0 12px;font-size:1.2rem}
+        .sr-hl p{font-size:14px;line-height:1.7;color:#444;margin:0 0 10px}
+
+        /* ===== CUSTOMER REVIEWS - RIGHT SIDE PANEL ===== */
+        .rev-tab{position:fixed;right:0;top:45%;z-index:1000;background:#000;color:#fff;border:0;padding:14px 10px;border-radius:10px 0 0 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer;writing-mode:vertical-rl;box-shadow:-3px 3px 12px rgba(0,0,0,.25);transition:background .2s}
+        .rev-tab:hover{background:#f5b400;color:#000}
+        .rev-panel{position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;background:#fff;z-index:1001;box-shadow:-6px 0 24px rgba(0,0,0,.2);transform:translateX(105%);transition:transform .3s ease;display:flex;flex-direction:column;font-family:'Montserrat',sans-serif}
+        .rev-panel.open{transform:translateX(0)}
+        .rev-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#000;color:#fff}
+        .rev-head h3{margin:0;font-size:16px;font-weight:700}
+        .rev-close{background:none;border:0;color:#fff;font-size:24px;cursor:pointer;line-height:1}
+        .rev-list{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+        .sr-rev-card{background:#fafafa;border:1px solid #eee;border-radius:12px;padding:14px;text-align:left}
+        .sr-rev-card .stars{color:#f5b400;font-size:16px;letter-spacing:2px}
+        .sr-rev-card p{font-size:13px;color:#444;margin:8px 0}
+        .sr-rev-card b{font-size:12px}
+        .rev-del{display:block;margin-top:10px;background:none;border:1px solid #d33;color:#d33;border-radius:50px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+        .rev-del:hover{background:#d33;color:#fff}
+        .rev-img{width:100%;max-height:300px;border-radius:10px;margin-top:8px;object-fit:cover}
+        .rev-video{width:100%;max-height:300px;border-radius:10px;margin-top:8px;background:#000;object-fit:cover}
+        .rev-form{padding:14px;border-top:1px solid #eee;background:#fff7dc}
+        .rev-form h4{margin:0 0 8px;font-size:14px}
+        .rev-form input,.rev-form textarea{width:100%;padding:9px;margin-bottom:8px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:13px;box-sizing:border-box}
+        .sr-stars-pick{font-size:24px;color:#ccc;cursor:pointer;margin-bottom:6px;user-select:none}
+        .sr-stars-pick span.on{color:#f5b400}
+        .rev-upload{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+        .rev-upload label{background:#fff;border:1px dashed #000;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;white-space:nowrap}
+        .rev-upload label:hover{background:#f5b400}
+        .rev-upload input{display:none}
+        #revVideoName,#revImageName{color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .rev-form button{background:#000;color:#fff;border:0;padding:10px 22px;border-radius:50px;font-weight:600;cursor:pointer}
+        .rev-form button:hover{background:#f5b400;color:#000}
+
+        /* ===== NEW LAYOUT ===== */
+        html{scroll-behavior:smooth}
+        .sr-sec-title{text-align:center;font-family:'Montserrat',sans-serif;font-size:clamp(1.4rem,3.2vw,2rem);font-weight:800;letter-spacing:2px;margin:0 0 34px;text-transform:uppercase}
+        .sr-sec-title::after{content:'';display:block;width:60px;height:3px;background:#f5b400;margin:10px auto 0}
+        .sr-blk{padding:60px 5vw;font-family:'Montserrat',sans-serif;background:#fff}
+        .sr-blk.alt{background:#fafafa}
+        .sr-hero{position:relative;overflow:hidden;min-height:520px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;background:#222;padding:60px 5vw;font-family:'Montserrat',sans-serif}
+        .sr-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.55));z-index:1}
+        .sr-hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .sr-hero>div{position:relative;z-index:2}
+        .sr-hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+        .sr-btn.ghost{background:transparent;color:#fff;border:2px solid #fff;padding:12px 34px}
+        .sr-btn.ghost:hover{background:#fff;color:#000}
+        .header-right a{text-decoration:none}
+        .studio-box{display:grid;grid-template-columns:1fr 1fr;gap:30px;max-width:1000px;margin:0 auto;align-items:center;background:#fff;border:1px solid #eee;border-radius:16px;padding:28px}
+        .studio-box img{width:100%;max-height:320px;object-fit:cover;border-radius:12px}
+        .studio-box h3{margin:0 0 10px;font-size:1.3rem;font-weight:800}
+        .studio-box p{font-size:14px;line-height:1.7;color:#444;margin:0 0 12px}
+        .studio-box ul{list-style:none;padding:0;margin:0 0 18px;font-size:14px;line-height:2;color:#333}
+        @media(max-width:800px){.studio-box{grid-template-columns:1fr}}
+        .sr-hero h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;letter-spacing:3px;margin:0 0 12px}
+        .sr-hero p{font-size:clamp(.95rem,2vw,1.2rem);margin:0 0 28px}
+        .sr-btn{display:inline-block;background:#f5b400;color:#000;padding:14px 38px;border-radius:50px;font-weight:700;letter-spacing:1px;text-decoration:none;border:0;cursor:pointer;font-family:inherit;font-size:14px;transition:transform .2s,background .2s,color .2s}
+        .sr-btn:hover{transform:translateY(-3px);background:#fff;color:#000}
+        .sr-btn.dark{background:#000;color:#fff}
+        .sr-btn.dark:hover{background:#f5b400;color:#000}
+        .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px;max-width:1100px;margin:0 auto}
+        .cat-card{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#222;font-weight:600;font-size:14px;gap:12px;text-align:center;transition:transform .2s}
+        .cat-card:hover{transform:translateY(-6px)}
+        .cat-card img{width:150px;height:150px;border-radius:50%;object-fit:cover;border:3px solid #f5b400}
+        .pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px;max-width:1100px;margin:0 auto}
+        .pc{position:relative;background:#fff;border:1px solid #eee;border-radius:14px;overflow:hidden;text-decoration:none;color:#222;text-align:center;padding-bottom:18px;transition:transform .2s,box-shadow .2s}
+        .pc:hover{transform:translateY(-6px);box-shadow:0 12px 26px rgba(0,0,0,.12)}
+        .pc img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+        .pc h3{font-size:15px;margin:14px 10px 6px;font-weight:700}
+        .pc p{font-size:13px;color:#666;margin:0 12px 10px}
+.pc-fit img{object-fit:contain;background:#fdf4f1}
+        .pc .tag{position:absolute;top:10px;left:10px;background:#000;color:#f5b400;font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px}
+        .pc .price{color:#1a8a3c;font-weight:700;font-size:14px}
+        .sr-videos.sr-ig-sec{padding:60px 5vw}
+        .sr-ig-sec .sr-sec-title{color:#fff}
+        .sr-ig-big{text-align:center;color:#f5b400;font-family:'Montserrat',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin:-10px 0 26px}
+        .sr-ig-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+        .rv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;max-width:1100px;margin:0 auto 28px}
+        .rv-cta{text-align:center}
+        .sr-vm-card .big{font-size:2.6rem;font-weight:800;text-align:center;line-height:1;margin:4px 0}
+        .sr-vm-card .sub-h{text-align:center;font-weight:700;margin:0 0 12px}
+        .sr-footer{background:#000;color:#ddd;font-family:'Montserrat',sans-serif;padding:50px 5vw 20px}
+        .sr-foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:30px;max-width:1100px;margin:0 auto 30px}
+        .sr-footer h4{color:#f5b400;margin:0 0 14px;font-size:14px;letter-spacing:1px}
+        .sr-footer a{display:block;color:#ddd;text-decoration:none;font-size:13px;margin-bottom:8px;cursor:pointer}
+        .sr-footer a:hover{color:#f5b400}
+        .sr-footer p{font-size:13px;line-height:1.7;margin:0 0 8px}
+        .sr-footer img{height:70px;width:auto;border-radius:6px;margin-bottom:12px}
+        .sr-foot-bottom{border-top:1px solid #333;padding-top:16px;text-align:center;font-size:12px;color:#999}
+
+        /* ===== CENTERED MENU (logo > menu in the middle, search/icons on the right) ===== */
+        .navbar .nav-bottom{display:grid !important;grid-template-columns:1fr auto 1fr;align-items:center}
+        .navbar .nav-bottom .secondary-menu{grid-column:2;justify-content:center}
+        .navbar .nav-bottom .header-right{grid-column:3;justify-self:end}
+        @media(max-width:900px){
+            .navbar .nav-bottom{grid-template-columns:1fr;row-gap:10px}
+            .navbar .nav-bottom .secondary-menu,.navbar .nav-bottom .header-right{grid-column:1;justify-self:center}
+        }
+
+        /* ===== HERO SLIDER (4 auto-sliding images) ===== */
+        .hero-slider{position:relative;width:100%;overflow:hidden;background:#fff3f6;font-family:'Montserrat',sans-serif}
+        .hero-track{display:flex;transition:transform .8s ease}
+        .hero-slide{min-width:100%;height:400px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr);align-items:center;overflow:hidden}
+        .hero-text{padding:0 9%}
+        .hero-text small{letter-spacing:3px;font-weight:700;color:#c2185b;font-size:12px}
+        .hero-text h2{font-size:clamp(1.6rem,3.6vw,2.8rem);font-weight:800;margin:8px 0 10px;color:#222}
+        .hero-text p{font-size:15px;line-height:1.7;color:#555;margin:0 0 22px}
+        .hero-slide img{width:100%;height:100%;max-height:100%;object-fit:contain;object-position:center;padding:18px;box-sizing:border-box;display:block}
+        .hero-slide.s1{background:linear-gradient(135deg,#fff3f6,#fde1ea)}
+        .hero-slide.s2{background:linear-gradient(135deg,#f5eeff,#e6dcff)}
+        .hero-slide.s3{background:linear-gradient(135deg,#fff6e9,#ffe9c4)}
+        .hero-slide.poster{display:flex;justify-content:center;background:#f7e9e0}
+        .hero-slide.poster img{width:auto;height:100%;object-fit:contain}
+        .hero-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.85);font-size:18px;cursor:pointer;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+        .hero-arrow:hover{background:#f5b400}
+        .hero-prev{left:14px}.hero-next{right:14px}
+        .hero-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+        .hero-dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(0,0,0,.25);cursor:pointer;transition:all .3s}
+        .hero-dots button.active{background:#f5b400;width:26px;border-radius:6px}
+        @media(max-width:800px){
+            .hero-slide{grid-template-columns:1fr;height:auto}
+            .hero-slide img{order:-1;height:260px}
+            .hero-text{padding:20px 6% 44px;text-align:center}
+            .hero-slide.poster{height:auto}
+            .hero-slide.poster img{width:100%;height:auto;max-height:420px}
+            .hero-arrow{display:none}
+        }
+
+        /* ===== SOFT AESTHETIC BACKGROUND FOR THE TOP SECTION ===== */
+        #home{position:relative;overflow:hidden;background:radial-gradient(rgba(214,140,170,.22) 1px,transparent 1.6px) 0 0/24px 24px,linear-gradient(135deg,#fff3f6 0%,#f5eeff 50%,#fff6e9 100%)}
+        #home::before{content:'';position:absolute;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(244,143,177,.38),transparent 70%);top:-150px;left:-120px;pointer-events:none}
+        #home::after{content:'';position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.32),transparent 70%);bottom:-190px;right:-140px;pointer-events:none}
+        #home>*{position:relative;z-index:1}
+        #home .studio-box{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.9);box-shadow:0 16px 44px rgba(190,120,170,.18)}
+    </style>
+       <link rel="stylesheet" href="review-panel-style.css?v=2">
+</head>
+
+<body>
+
+    <!-- TOP OFFER BAR -->
+    <div class="offer-bar">
+        <div class="offer-bar-track">
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <span class="highlight">FREE SHIPPING ON ORDER ABOVE 5000/-</span>
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <!-- duplicate set for seamless loop -->
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <span class="highlight">FREE SHIPPING ON ORDER ABOVE 5000/-</span>
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+
+        <div class="nav-top">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="Saubhagya Logo">
+            </div>
+
+            <nav class="main-menu">
+            </nav>
+        </div>
+
+        <div class="nav-bottom">
+            <nav class="secondary-menu">
+                <a href="index.html">HOME</a>
+
+                <div class="dropdown">
+                    <a href="#categories" class="dropbtn">COLLECTIONS</a>
+                    <div class="dropdown-content">
+                        <a href="Rose.html">
+                            <img src="images/charm.jpeg" alt="Rose Preserve">
+                            <span>Rose Preserve</span>
+                        </a>
+                        <a href="clock.html">
+                            <img src="images/clock2.jpg" alt="Resin Clock">
+                            <span>Resin Clock</span>
+                        </a>
+                        <a href="pooja-thali.html">
+                            <img src="images/pooja.jpg" alt="Pooja Thali">
+                            <span>Pooja Thali</span>
+                        </a>
+                        <a href="t-light.html">
+                            <img src="images/rtilight.jpg" alt="Resin T-Light">
+                            <span>Resin T-Light</span>
+                        </a>
+                        <a href="jewel.html">
+                            <img src="images/JEWELLARY .jpeg" alt="Resin Jewellery">
+                            <span>Resin Jewellery</span>
+                        </a>
+                        <a href="frame.html">
+                            <img src="images/frame1.jpg" alt="Resin Frame">
+                            <span>Resin Frame</span>
+                        </a>
+                        <a href="keychain.html">
+                            <img src="images/keychain.jpg" alt="Resin Keychain">
+                            <span>Resin Keychain</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="#about">ABOUT</a>
+
+                <a href="#" onclick="toggleContactPanel(); return false;">CONTACT</a>
+            </nav>
+
+            <div class="header-right">
+                <input type="text" id="searchInput" onkeyup="srSearch()" placeholder="Search products...">
+
+                <!-- User Profile Link -->
+                <a href="login.html" class="icon-link" title="Login">👤</a>
+
+                <!-- Cart Link -->
+                <a href="cart.html" class="icon-link" title="View Cart">🛒</a>
+            </div>
+        </div>
+
+        <!-- FLOATING CONTACT PANEL (bottom-right, toggled by CONTACT US) -->
+        <div class="contact-panel" id="contactPanel">
+            <div class="contact-panel-details">
+                <span>📞 9175171659</span>
+                <span>✉️ saubhagya2in@gmail.com</span>
+            </div>
+            <a href="https://wa.me/919175171659" target="_blank" class="whatsapp-fab" title="Chat on WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="#fff">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12.004 2C6.486 2 2 6.486 2 12.004c0 1.98.573 3.828 1.56 5.398L2 22l4.72-1.539A9.945 9.945 0 0 0 12.004 22C17.522 22 22 17.514 22 12.004 22 6.486 17.522 2 12.004 2zm0 18.017a8.01 8.01 0 0 1-4.09-1.117l-.293-.174-2.803.914.923-2.738-.19-.28a8.005 8.005 0 0 1-1.24-4.618c0-4.42 3.596-8.016 8.017-8.016 4.42 0 8.017 3.596 8.017 8.016 0 4.42-3.596 8.013-8.017 8.013z"/>
+                </svg>
+            </a>
+        </div>
+
+    </header>
+
+    <script>
+        function toggleContactPanel() {
+            document.getElementById('contactPanel').classList.toggle('open');
+        }
+    </script>
+
+
+    <!-- ===== HERO SLIDER: 3 collections with EXPLORE + 1 birthday poster ===== -->
+    <section class="hero-slider" id="heroSlider" aria-label="Featured collections">
+        <div class="hero-track">
+              <div class="hero-slide poster">
+                <img src="images/sabirth.jpg" alt="Birthday Special - 10% off, code SAUBHAGYA19">
+            </div>
+
+            <div class="hero-slide s1">
+                <div class="hero-text">
+                    <small>NEW COLLECTION</small>
+                    <h2>Rose Preserve</h2>
+                    <p>Real flowers, preserved forever in glossy resin.</p>
+                    <a href="Rose.html" class="sr-btn dark">EXPLORE →</a>
+                </div>
+                <img src="images/rosejewel.jpg" alt="Rose Preserve">
+            </div>
+
+            <div class="hero-slide s2">
+                <div class="hero-text">
+                    <small>HANDMADE</small>
+                    <h2>Resin Jewellery</h2>
+                    <p>Pendants, earrings and more, made with love.</p>
+                    <a href="jewel.html" class="sr-btn dark">EXPLORE →</a>
+                </div>
+                <img src="images/JEWELLARY .jpeg" alt="Resin Jewellery">
+            </div>
+
+            <div class="hero-slide s3">
+                <div class="hero-text">
+                    <small>BEST SELLER</small>
+                    <h2>Resin Clocks</h2>
+                    <p>Custom designer wall clocks. Make every hour art.</p>
+                    <a href="clock.html" class="sr-btn dark">EXPLORE →</a>
+                </div>
+                <img src="images/clock2.jpg" alt="Resin Clock">
+            </div>
+
+            <!-- Birthday Special poster (delete this block after 19 Oct) -->
+          
+
+        </div>
+        <button class="hero-arrow hero-prev" type="button" aria-label="Previous">&#10094;</button>
+        <button class="hero-arrow hero-next" type="button" aria-label="Next">&#10095;</button>
+        <div class="hero-dots"></div>
+    </section>
+
+
+    <!-- ===== DESIGN YOUR OWN (top of page) ===== -->
+    <section class="sr-blk alt" id="home">
+        <h2 class="sr-sec-title">Design Your Own</h2>
+        <div class="studio-box">
+            <img src="images/custome.png" alt="Saubhagya Design Studio" onerror="this.remove()">
+            <div>
+                <h3>Saubhagya Design Studio</h3>
+                <p>Create your own resin piece online. Pick a shape and size, then make it yours.</p>
+                <ul>
+                    <li>🎨 16 resin colours to choose from</li>
+                    <li>✨ AI Design: describe your idea and get a starting design</li>
+                    <li>🌸 Real flowers, raw materials and stickers</li>
+                    <li>Aa Your text in English, Hindi, Marathi, Gujarati or Sanskrit</li>
+                    <li>₹ Live price as you design. Add to cart or order on WhatsApp</li>
+                </ul>
+                <a href="customizer.html" class="sr-btn dark">START DESIGNING →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SHOP BY CATEGORY ===== -->
+    <section class="sr-blk" id="categories">
+        <h2 class="sr-sec-title">Shop by Category</h2>
+        <div class="cat-grid">
+            <a class="cat-card" href="Rose.html" data-s="Rose Preserve"><img src="images/rosejewel.jpg" alt="Rose Preserve"><span>Rose Preserve</span></a>
+            <a class="cat-card" href="clock.html" data-s="Resin Clock"><img src="images/clock2.jpg" alt="Resin Clock"><span>Resin Clock</span></a>
+            <a class="cat-card" href="pooja-thali.html" data-s="Pooja Thali"><img src="images/pooja.jpg" alt="Pooja Thali"><span>Pooja Thali</span></a>
+            <a class="cat-card" href="t-light.html" data-s="Resin T-Light"><img src="images/rtilight.jpg" alt="Resin T-Light"><span>Resin T-Light</span></a>
+            <a class="cat-card" href="jewel.html" data-s="Resin Jewellery"><img src="images/JEWELLARY .jpeg" alt="Resin Jewellery"><span>Resin Jewellery</span></a>
+            <a class="cat-card" href="frame.html" data-s="Resin Frame"><img src="images/frame1.jpg" alt="Resin Frame"><span>Resin Frame</span></a>
+            <a class="cat-card" href="keychain.html" data-s="Resin Keychain"><img src="images/keychain.jpg" alt="Resin Keychain"><span>Resin Keychain</span></a>
+        </div>
+    </section>
+
+    <!-- ===== BEST SELLERS ===== -->
+    <section class="sr-blk alt" id="bestsellers">
+        <h2 class="sr-sec-title">Best Sellers</h2>
+        <div class="pg">
+            <a class="pc" href="clock.html" data-s="Resin Clock Handcrafted custom designer resin wall clock."><span class="tag">BEST SELLER</span><img src="images/clock2.jpg" alt="Resin Clock"><h3>RESIN CLOCK</h3><p>Handcrafted custom designer resin wall clock.</p></a>
+            <a class="pc" href="pooja-thali.html" data-s="Pooja Thali Decorative handcrafted resin pooja thali set."><span class="tag">BEST SELLER</span><img src="images/pooja.jpg" alt="Pooja Thali"><h3>POOJA THALI</h3><p>Decorative handcrafted resin pooja thali set.</p></a>
+            <a class="pc" href="jewel.html" data-s="Resin Jewellery Handmade pendant and earring set."><span class="tag">BEST SELLER</span><img src="images/JEWELLARY .jpeg" alt="Resin Jewellery"><h3>RESIN JEWELLERY</h3><p>Handmade pendant and earring set.</p></a>
+            <a class="pc" href="frame.html" data-s="Resin Frame Personalized resin photo memory frame."><span class="tag">BEST SELLER</span><img src="images/frame1.jpg" alt="Resin Frame"><h3>RESIN FRAME</h3><p>Personalized resin photo memory frame.</p></a>
+        </div>
+    </section>
+
+   
+
+    <!-- ===== FOLLOW US ON INSTAGRAM ===== -->
+    <section class="sr-videos sr-ig-sec" id="instagram">
+        <h2 class="sr-sec-title">Follow Us on Instagram</h2>
+        <div class="sr-ig-big">100K+ VIEWS 🎉</div>
+        <div class="sr-vgrid">
+            <figure><video src="REEL/REEL1.mp4" autoplay muted loop playsinline preload="metadata" onerror="this.nextElementSibling.remove();this.remove()"></video><button class="sr-snd" type="button" aria-label="Turn sound on">🔇</button><figcaption>Add video 1<br><small>reels/video1.mp4</small></figcaption></figure>
+            <figure><video src="REEL/WhatsApp Video 2026-10-03 at 3.52.38 PM.mp4" autoplay muted loop playsinline preload="metadata" onerror="this.nextElementSibling.remove();this.remove()"></video><button class="sr-snd" type="button" aria-label="Turn sound on">🔇</button><figcaption>Add video 2<br><small>reels/video2.mp4</small></figcaption></figure>
+            <figure><video src="REEL/REEL 3.mp4" autoplay muted loop playsinline preload="metadata" onerror="this.nextElementSibling.remove();this.remove()"></video><button class="sr-snd" type="button" aria-label="Turn sound on">🔇</button><figcaption>Add video 3<br><small>reels/video3.mp4</small></figcaption></figure>
+            <figure><video src="REEL/REEL 4.mp4" autoplay muted loop playsinline preload="metadata" onerror="this.nextElementSibling.remove();this.remove()"></video><button class="sr-snd" type="button" aria-label="Turn sound on">🔇</button><figcaption>Add video 4<br><small>reels/video4.mp4</small></figcaption></figure>
+        </div>
+        
+    </section>
+
+    <!-- ===== CUSTOMER REVIEWS ===== -->
+    <section class="sr-blk alt" id="reviews">
+        <h2 class="sr-sec-title">Customer Reviews</h2>
+        <div class="rv-grid" id="reviewPreview"></div>
+        <div class="rv-cta"><button type="button" class="sr-btn dark" id="revOpenBtn">READ ALL &amp; WRITE A REVIEW</button></div>
+    </section>
+
+    <!-- ===== ABOUT THE BRAND: Vision | Mission | Achievement ===== -->
+    <section class="sr-vm" id="about">
+        <h2 class="sr-sec-title">About the Brand</h2>
+        <div class="sr-vm-grid">
+            <div class="sr-vm-card">
+                <div class="ico">👁️</div>
+                <h2>Our Vision</h2>
+                <p>To become a leading and trusted brand in the artificial jewellery industry, known for stylish designs, quality craftsmanship, and affordable fashion. We envision building a strong e-commerce presence and making beautiful jewellery accessible to customers across India and beyond.</p>
+            </div>
+            <div class="sr-vm-card">
+                <div class="ico">🎯</div>
+                <h2>Our Mission</h2>
+                <p>Our mission is to grow into one of the best and most recognized artificial jewellery sellers in e-commerce by offering trendy, elegant, and affordable jewellery for every occasion.</p>
+                <p><b>We are committed to:</b></p>
+                <ul>
+                    <li>Bringing new and attractive jewellery designs to our customers.</li>
+                    <li>Maintaining good quality at affordable prices.</li>
+                    <li>Providing a smooth and reliable online shopping experience.</li>
+                    <li>Building long-term relationships through customer satisfaction and trust.</li>
+                    <li>Continuously expanding our product range and online presence.</li>
+                </ul>
+            </div>
+            <div class="sr-vm-card">
+                <div class="ico">🏆</div>
+                <h2>Our Achievement</h2>
+                <div class="big">100K+</div>
+                <p class="sub-h">Instagram Views 🎉</p>
+                <p>Our journey has already reached an exciting milestone of 100K+ views on Instagram, reflecting the growing interest and support for our creations.</p>
+                <p>This achievement inspires us to grow further, reach more customers, and take our artificial jewellery brand to the next level in the e-commerce space.</p>
+                <div class="sr-awards"><span>100K+ Views</span><span>Growing Online Presence</span><span>Building Towards a Bigger E-Commerce Brand</span></div>
+            </div>
+            <a class="sr-ig-card" href="https://www.instagram.com/krirashiv_handcraft/" target="_blank" rel="noopener">
+                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.222a3.008 3.008 0 1 0 0 6.016 3.008 3.008 0 0 0 0-6.016zm0 1.442a1.566 1.566 0 1 1 0 3.132 1.566 1.566 0 0 1 0-3.132z"/>
+                </svg>
+                <div>
+                    <h3>See Our Vision in Action</h3>
+                    <p>Follow our Instagram page <b>@krirashiv_handcraft</b> for our latest designs and handcrafted creations.</p>
+                </div>
+                <span class="sr-ig-btn">Visit Instagram →</span>
+            </a>
+
+            <!-- NEW: BOTH INSTAGRAM ACCOUNTS (below the banner) -->
+            <div class="sr-ig-row">
+                <a class="sr-btn" href="https://www.instagram.com/saubhagya2_in/" target="_blank" rel="noopener">📸 @saubhagya2_in</a>
+                <a class="sr-btn dark" href="https://www.instagram.com/krirashiv_handcraft/" target="_blank" rel="noopener">📸 @krirashiv_handcraft</a>
+            </div>
+        </div>
+        <div class="sr-sec" id="achievements">
+            <div class="sr-nums">
+            <div><b data-n="1200">0</b>Orders delivered</div>
+            <div><b data-n="2">0</b>Events</div>
+            <div><b data-n="240">0</b>Reels</div>
+            <div><b data-n="2">0</b>Awards won</div>
+        </div>
+        <div class="sr-awards"><span>Best Handmade Brand 2025</span><span>College Fest Winner</span><span>Featured in local news</span></div>
+        <!-- 2 VIDEOS + 2 PHOTOS. Videos go in the "reels" folder, photos in the "images" folder. -->
+        <div class="sr-gallery">
+            <figure><video src="REEL/ACHIVE1.mp4" autoplay muted loop playsinline controls onerror="this.remove()"></video><figcaption>Add video 1<br><small>reels/achievement1.mp4</small></figcaption></figure>
+            <figure><video src="REEL/ACH.mp4" autoplay muted loop playsinline controls onerror="this.remove()"></video><figcaption>Add video 2<br><small>reels/achievement2.mp4</small></figcaption></figure>
+            <figure><img src="images/ACHIVE2.jpeg" alt="Achievement photo 1" onerror="this.remove()"><figcaption>Add photo 1<br><small>images/achievement3.jpg</small></figcaption></figure>
+            <figure><img src="images/ACHIVE4.png" alt="Achievement photo 2" onerror="this.remove()"><figcaption>Add photo 2<br><small>images/achievement4.jpg</small></figcaption></figure>
+        </div>
+        </div>
+    </section>
+
+    <section class="features">
+
+        <div class="feature">
+            <div class="feature-icon">💧</div>
+            <h4>CASTING<br>+ COATING</h4>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">🎓</div>
+            <h4>5 IN 1 PRO<br>ONLINE COURSE</h4>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">📜</div>
+            <h4>EXPERT<br>GUIDANCE</h4>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">🎁</div>
+            <h4>FREE<br>WORKSHOP KIT</h4>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">✓</div>
+            <h4>BEGINNER FRIENDLY<br>STEP BY STEP</h4>
+        </div>
+
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="sr-footer">
+        <div class="sr-foot-grid">
+            <div>
+                <img src="images/logo.jpg" alt="Saubhagya Logo">
+                <p>Handmade gifts &amp; resin art, crafted with love.</p>
+            </div>
+            <div>
+                <h4>QUICK LINKS</h4>
+                <a href="index.html">Home</a>
+                <a href="#categories">Collections</a>
+                <a href="customizer.html">Design Your Own</a>
+                <a href="#about">About</a>
+                <a onclick="srOpenReviews();return false;">Customer Reviews</a>
+                <a href="cart.html">Cart</a>
+                <a href="login.html">Login / Sign Up</a>
+            </div>
+            <div>
+                <h4>CATEGORIES</h4>
+                <a href="Rose.html">Rose Preserve</a>
+                <a href="clock.html">Resin Clock</a>
+                <a href="pooja-thali.html">Pooja Thali</a>
+                <a href="t-light.html">Resin T-Light</a>
+                <a href="jewel.html">Resin Jewellery</a>
+                <a href="frame.html">Resin Frame</a>
+                <a href="keychain.html">Resin Keychain</a>
+            </div>
+            <div>
+                <h4>CONTACT US</h4>
+                <p>📞 9175171659</p>
+                <p>✉️ saubhagya2in@gmail.com</p>
+                <a href="https://wa.me/919175171659" target="_blank" rel="noopener">WhatsApp us</a>
+                <a href="https://www.instagram.com/saubhagya2_in/" target="_blank" rel="noopener">Instagram: @saubhagya2_in</a>
+                <a href="https://www.instagram.com/krirashiv_handcraft/" target="_blank" rel="noopener">Instagram: @krirashiv_handcraft</a>
+            </div>
+        </div>
+        <div class="sr-foot-bottom">© <span id="yr">2026</span> Saubhagya. All rights reserved.</div>
+    </footer>
+
+    <script>
+    function srSearch(){
+        var q=document.getElementById('searchInput').value.toLowerCase().trim();
+        document.querySelectorAll('[data-s]').forEach(function(el){
+            el.style.display=(!q||el.getAttribute('data-s').toLowerCase().indexOf(q)>-1)?'':'none';
+        });
+        if(q){
+            var t=document.getElementById('categories').getBoundingClientRect();
+            if(t.bottom<0||t.top>window.innerHeight){document.getElementById('categories').scrollIntoView({behavior:'smooth'})}
+        }
+    }
+    document.getElementById('yr').textContent=new Date().getFullYear();
+    </script>
+
+    <script>
+    (function(){
+        var io=new IntersectionObserver(function(es){es.forEach(function(x){
+            if(!x.isIntersecting)return;io.unobserve(x.target);
+            var n=+x.target.getAttribute('data-n'),s=0,st=Math.max(1,n/60);
+            var t=setInterval(function(){s+=st;if(s>=n){s=n;clearInterval(t)}
+                x.target.textContent=Math.round(s).toLocaleString()+(n>=100?'+':'')},25)})},{threshold:.6});
+        document.querySelectorAll('.sr-nums [data-n]').forEach(function(el){io.observe(el)});
+    })();
+    </script>
+
+    <!-- Sound toggle for the 4 top videos (browsers only allow autoplay when muted, so the visitor taps to hear) -->
+    <script>
+    (function(){
+        var vids=document.querySelectorAll('.sr-vgrid video'),btns=document.querySelectorAll('.sr-snd');
+        document.querySelectorAll('.sr-vgrid figure').forEach(function(fig){
+            var v=fig.querySelector('video'),b=fig.querySelector('.sr-snd');
+            if(!v||!b)return;
+            function toggle(){
+                var turnOn=v.muted;
+                vids.forEach(function(o){o.muted=true});
+                btns.forEach(function(x){x.textContent='🔇'});
+                if(turnOn){v.muted=false;v.volume=1;var p=v.play();if(p&&p.catch)p.catch(function(){});b.textContent='🔊'}
+            }
+            b.addEventListener('click',function(e){e.stopPropagation();toggle()});
+            v.addEventListener('click',toggle);
+        });
+    })();
+    </script>
+
+    <!-- ===== CUSTOMER REVIEWS: right-side slide-out panel ===== -->
+    <button class="rev-tab" id="revTab" type="button">⭐ REVIEWS</button>
+    <aside class="rev-panel" id="revPanel">
+        <div class="rev-head">
+            <h3>Customer Reviews</h3>
+            <button class="rev-close" id="revClose" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div class="rev-list" id="reviewList"></div>
+        <div class="rev-form">
+            <h4>Write a review</h4>
+            <div class="sr-stars-pick" id="starPick">
+                <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+            </div>
+            <input type="text" id="revName" placeholder="Your name">
+            <textarea id="revText" rows="2" placeholder="Share your experience..."></textarea>
+            <div class="rev-upload">
+                <label for="revImage">🖼️ Upload photo</label>
+                <input type="file" id="revImage" accept="image/*">
+                <span id="revImageName">No photo chosen</span>
+            </div>
+            <div class="rev-upload">
+                <label for="revVideo">🎥 Upload video</label>
+                <input type="file" id="revVideo" accept="video/*">
+                <span id="revVideoName">No video chosen</span>
+            </div>
+            <button type="button" id="revSubmit">Submit Review</button>
+        </div>
+    </aside>
+
+    <!-- ===== CUSTOMER REVIEWS SCRIPT ===== -->
+    <!-- Reviews are now stored in the server SQLite database. -->
+    <script src="reviews-client.js"></script>
+
+    <!-- ===== HERO SLIDER SCRIPT (auto-slides every 4 seconds) ===== -->
+    <script>
+    (function(){
+        var s=document.getElementById('heroSlider'),
+            track=s.querySelector('.hero-track'),
+            slides=s.querySelectorAll('.hero-slide'),
+            box=s.querySelector('.hero-dots'),
+            i=0,timer,DELAY=4000;
+        slides.forEach(function(_,n){
+            var b=document.createElement('button');
+            b.setAttribute('aria-label','Slide '+(n+1));
+            b.onclick=function(){go(n);restart()};
+            box.appendChild(b);
+        });
+        var dots=box.querySelectorAll('button');
+        function go(n){
+            i=(n+slides.length)%slides.length;
+            track.style.transform='translateX('+(-i*100)+'%)';
+            dots.forEach(function(d,k){d.classList.toggle('active',k===i)});
+        }
+        function restart(){clearInterval(timer);timer=setInterval(function(){go(i+1)},DELAY)}
+        s.querySelector('.hero-prev').onclick=function(){go(i-1);restart()};
+        s.querySelector('.hero-next').onclick=function(){go(i+1);restart()};
+        s.addEventListener('mouseenter',function(){clearInterval(timer)});
+        s.addEventListener('mouseleave',restart);
+        var x0=null;
+        s.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+        s.addEventListener('touchend',function(e){
+            if(x0===null)return;
+            var dx=e.changedTouches[0].clientX-x0;
+            if(Math.abs(dx)>40){go(dx<0?i+1:i-1);restart()}
+            x0=null;
+        });
+        go(0);restart();
+    })();
+    </script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

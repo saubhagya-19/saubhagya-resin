@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saubhagya Resin – Login</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f8f9fb;font-family:'Poppins',system-ui,sans-serif;color:#2c3e50;display:flex;justify-content:center;padding:48px 16px}
+.card{background:#fff;width:100%;max-width:500px;border-radius:16px;padding:35px;box-shadow:0 4px 24px rgba(0,0,0,.06);align-self:flex-start}
+h1{text-align:center;font-size:28px;margin:0 0 8px;font-weight:600}
+.hint{text-align:center;color:#8a94a0;font-size:14px;margin:0 0 20px}
+input{width:100%;padding:16px 14px;margin-bottom:14px;border:1px solid #cfd4da;border-radius:8px;font:400 16px 'Poppins',sans-serif;background:#fff;color:#2c3e50;outline:none}
+input:focus{border:2px solid #e6a11a;padding:15px 13px}
+.otp{letter-spacing:8px;text-align:center;font-size:22px}
+.primary{width:100%;padding:16px;border:0;border-radius:6px;background:#e91e63;color:#fff;font:600 16px 'Poppins',sans-serif;cursor:pointer}
+.primary:disabled{opacity:.6}
+.link{border:0;background:none;color:#e91e63;font:500 14px 'Poppins',sans-serif;cursor:pointer;padding:6px 0;margin-top:8px}
+.link:disabled{color:#8a94a0;cursor:default}
+.msg{min-height:22px;margin:4px 0 12px;font-size:14px;text-align:center}
+.msg.err{color:#c62828}.msg.ok{color:#1b8a4b}
+.hide{display:none}
+.welcome{text-align:center}
+.welcome p{color:#8a94a0;margin:6px 0}
+.welcome .primary{margin-top:18px;background:#222}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row b{word-break:break-all}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Saubhagya Resin</h1>
+
+  <div id="authView">
+    <p class="hint" id="hint">Sign in or create an account with your email address.</p>
+    <div id="msg" class="msg" role="status"></div>
+
+    <!-- Step 1: email address -->
+    <div id="stepPhone">
+      <input id="phone" type="email" inputmode="email" maxlength="100" placeholder="Your email address" autocomplete="email" autocapitalize="off" spellcheck="false">
+      <button id="sendBtn" type="button" class="primary">Send OTP</button>
+    </div>
+
+    <!-- Step 2: OTP (+ name for new customers) -->
+    <div id="stepOtp" class="hide">
+      <div class="row" style="margin-bottom:12px">
+        <span style="font-size:14px">OTP sent to <b id="sentTo"></b></span>
+        <button id="changeBtn" type="button" class="link" style="margin:0">Change</button>
+      </div>
+      <input id="otp" class="otp" type="text" inputmode="numeric" maxlength="6" placeholder="------" autocomplete="one-time-code">
+      <input id="name" class="hide" type="text" placeholder="Your full name" autocomplete="name">
+      <button id="verifyBtn" type="button" class="primary">Verify &amp; Continue</button>
+      <div style="text-align:center"><button id="resendBtn" type="button" class="link" disabled>Resend OTP</button></div>
+    </div>
+  </div>
+
+  <div id="homeView" class="welcome hide">
+    <h2 id="hello" style="font-weight:600;margin:0 0 6px"></h2>
+    <p id="who"></p>
+    <p id="redirectNote">Taking you back to shopping…</p>
+    <button id="continueBtn" type="button" class="primary" style="background:#e91e63;margin-top:18px">Continue Shopping</button>
+    <button id="logout" type="button" class="primary" style="margin-top:10px">Log Out</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ====== SETTINGS ======
+  var DEFAULT_PAGE = 'index.html';   // page to open after login if customer came here directly
+  var USERS_KEY = 'sr_users', SESSION_KEY = 'sr_session';
+  // ======================
+  // Customers sign in with their email address + a one-time code (OTP) checked by the server.
+  // The browser keeps only the login token and the customer's name/email.
+
+  var $ = function(id){ return document.getElementById(id); };
+  var emailNow = '', needName = false, timer = null;
+
+  // Same rule the server uses to decide if an email address looks valid
+  function validEmail(e){
+    return e.length <= 100 && e.indexOf('..') === -1 &&
+      /^[a-z0-9._%+\-]+@[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?)*\.[a-z]{2,}$/.test(e);
+  }
+
+  // ---------- browser storage ----------
+  var storageOK = true;
+  try { localStorage.setItem('sr_test','1'); localStorage.removeItem('sr_test'); } catch(e){ storageOK = false; }
+  function load(key, fallback){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+  function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); return true; }catch(e){ return false; } }
+  function remove(key){ try{ localStorage.removeItem(key); }catch(e){} }
+
+  // ---------- talk to the server ----------
+  async function api(path, body){
+    var API_BASE = location.port === '3000' ? '' : 'http://localhost:3000';
+    var res = await fetch(API_BASE + path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    var data = {}, raw = '';
+    try { raw = await res.text(); data = JSON.parse(raw); } catch(e){}
+    if (!res.ok) console.error('API error', path, res.status, raw);   // full details in the browser console (F12)
+    return { ok: res.ok, status: res.status, data: data };
+  }
+  // Turns a failed response into a message that says what actually went wrong
+  function apiError(r, fallback){
+    if (r.data && r.data.error) return r.data.error;
+    if (r.status === 404) return 'OTP service not found (404). The server route is not deployed on this site.';
+    if (r.status === 405) return 'OTP service rejected the request (405). Check the server route accepts POST.';
+    if (r.status >= 500) return 'Server error (' + r.status + '). Check the server logs.';
+    return fallback + ' (code ' + r.status + ')';
+  }
+  function tokenPayload(token){
+    try{ var p = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); return JSON.parse(atob(p)); }catch(e){ return {}; }
+  }
+  function startSession(token, name, email){
+    var p = tokenPayload(token);
+    var user = { id: String(p.id), name: name, phone: '', email: email };
+    var users = load(USERS_KEY, []).filter(function(u){ return u.id !== user.id; });
+    users.push(user);
+    save(USERS_KEY, users);
+    var ok = save(SESSION_KEY, { id: user.id, token: token });
+    try { localStorage.setItem('token', token); localStorage.setItem('userName', name); } catch(e){}
+    return ok ? user : null;
+  }
+  function endSession(){
+    remove(SESSION_KEY);
+    try { localStorage.removeItem('token'); localStorage.removeItem('userName'); } catch(e){}
+  }
+
+  // ---------- UI helpers ----------
+  function msg(text, type){ var m = $('msg'); m.textContent = text || ''; m.className = 'msg ' + (type || ''); }
+  function showStep(step){
+    $('stepPhone').classList.toggle('hide', step !== 'phone');
+    $('stepOtp').classList.toggle('hide', step !== 'otp');
+  }
+  function startTimer(){
+    var left = 30, b = $('resendBtn');
+    b.disabled = true;
+    clearInterval(timer);
+    function tick(){
+      if (left <= 0){ clearInterval(timer); b.disabled = false; b.textContent = 'Resend OTP'; return; }
+      b.textContent = 'Resend OTP in ' + left + 's'; left--;
+    }
+    tick(); timer = setInterval(tick, 1000);
+  }
+
+  // ---------- where to go after login ----------
+  function getNext(){
+    try{
+      // 1. If the page explicitly sent a ?next=... value, use it.
+      var n = new URLSearchParams(location.search).get('next');
+
+      if(n){
+        if (location.protocol === 'file:') {
+          var seg = decodeURIComponent(n.split('?')[0].split('/').pop());
+          var q = n.indexOf('?') > -1 ? n.slice(n.indexOf('?')) : '';
+          if (seg && !/login/i.test(seg)) return seg + q;
+        } else {
+          var u = new URL(n, location.href);
+          if (u.origin === location.origin && !/login/i.test(u.pathname)) {
+            return u.pathname + u.search + u.hash;
+          }
+        }
+      }
+
+      // 2. Otherwise use the page the user came from.
+      if (document.referrer) {
+        var ref = new URL(document.referrer, location.href);
+
+        if (
+          ref.origin === location.origin &&
+          !/login/i.test(ref.pathname)
+        ) {
+          return ref.pathname + ref.search + ref.hash;
+        }
+      }
+    }catch(e){}
+
+    // 3. If login was opened directly, go to home page.
+    return DEFAULT_PAGE;
+  }
+
+  var redirectTimer = null;
+  function showHome(user, autoRedirect){
+    $('authView').classList.add('hide');
+    $('homeView').classList.remove('hide');
+
+    $('hello').textContent = 'Welcome, ' + user.name + '!';
+    $('who').textContent = user.email || (user.phone ? '+91 ' + user.phone : '');
+
+    var target = getNext();
+
+    $('continueBtn').onclick = function(){
+      location.href = target;
+    };
+
+    $('redirectNote').style.display = autoRedirect ? 'block' : 'none';
+
+    if (autoRedirect) {
+      // Show the welcome popup after the user reaches the destination page.
+      try {
+        localStorage.setItem(
+          'welcomeMessage',
+          'Welcome, ' + user.name + '! You are successfully logged in.'
+        );
+      } catch(e) {}
+
+      redirectTimer = setTimeout(function(){
+        location.href = target;
+      }, 1200);
+    }
+  }
+
+  var SERVER_HELP = 'Cannot reach the server. Start it with "node server.js" and open this page at http://localhost:3000/login.html';
+
+  // ---------- step 1: send the OTP ----------
+  async function sendOtp(){
+    var email = $('phone').value.trim().toLowerCase();
+    if (!validEmail(email)) return msg('Enter a valid email address.', 'err');
+    var r = await api('/api/otp/send', { email: email });
+    if (!r.ok) return msg(apiError(r, 'Could not send the OTP'), 'err');
+    emailNow = email; needName = false;
+    $('sentTo').textContent = email;
+    $('otp').value = ''; $('name').classList.add('hide'); $('name').value = '';
+    showStep('otp'); startTimer();
+    if (r.data.demoOtp) {
+      msg('Demo mode (no email sent). Your OTP is ' + r.data.demoOtp + '. Valid for 5 minutes.', 'ok');
+      $('otp').value = r.data.demoOtp;   // auto-fill so the demo is quick; remove this line to type it manually
+    } else {
+      msg('OTP sent to your email. It is valid for 5 minutes. Check Spam if you do not see it.', 'ok');
+    }
+    $('otp').focus();
+  }
+
+  // ---------- step 2: check the OTP ----------
+  async function verifyOtp(){
+    var code = $('otp').value.replace(/\D/g, ''), name = $('name').value.trim();
+    if (!/^\d{6}$/.test(code)) return msg('Enter the 6-digit OTP.', 'err');
+    if (needName && name.length < 2) return msg('Please enter your full name.', 'err');
+    var r = await api('/api/otp/verify', { email: emailNow, code: code, name: name });
+    if (!r.ok) return msg(apiError(r, 'Could not verify the OTP'), 'err');
+    if (r.data.needName){            // first time with this email: ask for a name
+      needName = true;
+      $('name').classList.remove('hide'); $('name').focus();
+      return msg('New here! Enter your name to finish.', 'ok');
+    }
+    var user = startSession(r.data.token, r.data.name, r.data.email);
+    if (!user) return msg('Could not start a session. Browser storage is blocked.', 'err');
+    msg('');
+    showHome(user, true);
+  }
+
+  // ---------- events ----------
+  function guard(btn, fn){
+    return async function(){
+      btn.disabled = true;
+      try { await fn(); } catch(e){ console.error(e); msg(SERVER_HELP, 'err'); }
+      if (btn.id !== 'resendBtn') btn.disabled = false;
+    };
+  }
+  $('sendBtn').onclick = guard($('sendBtn'), sendOtp);
+  $('verifyBtn').onclick = guard($('verifyBtn'), verifyOtp);
+  $('resendBtn').onclick = async function(){
+    try { await sendOtp(); } catch(e){ msg(SERVER_HELP, 'err'); }
+  };
+  $('changeBtn').onclick = function(){ clearInterval(timer); showStep('phone'); msg(''); $('phone').focus(); };
+  $('phone').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); $('sendBtn').click(); } });
+  $('otp').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); $('verifyBtn').click(); } });
+  $('name').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); $('verifyBtn').click(); } });
+  $('logout').onclick = function(){
+    if (redirectTimer) clearTimeout(redirectTimer);
+    endSession();
+    $('homeView').classList.add('hide'); $('authView').classList.remove('hide');
+    $('phone').value = ''; showStep('phone'); msg('');
+  };
+
+  // ---------- start ----------
+  if (!storageOK) {
+    msg('Browser storage is blocked, so login cannot work here.', 'err');
+  } else if (location.protocol === 'file:') {
+    msg(SERVER_HELP, 'err');
+  }
+  var s = load(SESSION_KEY, null);
+  var u = s && s.token && load(USERS_KEY, []).find(function(x){ return x.id === s.id; });
+  var wantsLogout = /[?&]logout=1/.test(location.search);
+  if (wantsLogout) { endSession(); }
+  if (u && !wantsLogout) showHome(u, false); else showStep('phone');
+})();
+</script>
+</body>
+</html>

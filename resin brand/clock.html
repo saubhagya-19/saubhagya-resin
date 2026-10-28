@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resin Clocks Collection - Saubhagya</title>
+    <!-- Menu font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Links to your main CSS stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Category Page Custom Styles */
+        .page-header {
+            padding: 20px 50px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #000;
+        }
+
+        .page-title {
+            margin-top: 10px;
+            font-size: 28px;
+            color: #333;
+        }
+
+        /* Enhanced Product Card Styles */
+        .product-card {
+            position: relative;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            background: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .product-card h3 {
+            font-size: 18px;
+            margin: 12px 0 6px 0;
+            color: #222;
+        }
+
+        .product-card .description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            min-height: 36px; /* Ensures consistent card height */
+        }
+
+        .product-card .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2a8703;
+            margin-bottom: 12px;
+        }
+
+        .add-cart-btn {
+            background-color: #222;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .add-cart-btn:hover {
+            background-color: #444;
+        }
+
+        .add-cart-btn.added {
+            background-color: #2a8703;
+        }
+
+        /* Cart + wishlist count badges */
+        .icon-link {
+            position: relative;
+        }
+
+        #cartCount {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #e63946;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #wlCount {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #e91e63;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        /* Wishlist heart on each product */
+        .wl-btn {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            z-index: 3;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(255,255,255,.95);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            color: #555;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+            transition: transform .15s, color .15s;
+        }
+
+        .wl-btn:hover {
+            transform: scale(1.12);
+            color: #e91e63;
+        }
+
+        .wl-btn.on {
+            color: #e91e63;
+        }
+
+        /* Wishlist window */
+        .wl-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .wl-overlay.open {
+            display: flex;
+        }
+
+        .wl-modal {
+            background: #fff;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 540px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .wl-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #000;
+            color: #fff;
+        }
+
+        .wl-head h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .wl-head button {
+            background: none;
+            border: 0;
+            color: #fff;
+            font-size: 26px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .wl-list {
+            padding: 6px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .wl-empty {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            padding: 34px 10px;
+            line-height: 1.7;
+        }
+
+        .wl-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .wl-item img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .wl-info {
+            flex: 1;
+        }
+
+        .wl-info b {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .wl-info span {
+            color: #2a8703;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .wl-add {
+            background: #222;
+            color: #fff;
+            border: 0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .wl-add:hover {
+            background: #444;
+        }
+
+        .wl-rm {
+            background: none;
+            border: 1px solid #d33;
+            color: #d33;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .wl-rm:hover {
+            background: #d33;
+            color: #fff;
+        }
+
+        .wl-foot {
+            padding: 12px 20px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+
+        .wl-clear {
+            background: #000;
+            color: #fff;
+            border: 0;
+            border-radius: 50px;
+            padding: 9px 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Toast notification */
+        #cartToast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #222;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 3000;
+        }
+
+        #cartToast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* SCROLLING OFFER BAR */
+        .offer-bar {
+            background: #000;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            width: 100%;
+        }
+
+        .offer-bar-track {
+            display: inline-flex;
+            animation: scroll-offer 18s linear infinite;
+        }
+
+        .offer-bar-track span {
+            padding: 10px 40px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .offer-bar-track span.highlight {
+            color: #f5b400;
+        }
+
+        @keyframes scroll-offer {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .offer-bar:hover .offer-bar-track {
+            animation-play-state: paused;
+        }
+
+        /* FLOATING CONTACT PANEL - bottom right corner */
+        .contact-panel {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+            z-index: 999;
+        }
+
+        .contact-panel-details {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: #fff;
+            padding: 14px 18px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .contact-panel.open .contact-panel-details {
+            display: flex;
+        }
+
+        .whatsapp-fab {
+            width: 52px;
+            height: 52px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .whatsapp-fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* ALL COLLECTIONS DROPDOWN */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            padding: 20px;
+            gap: 20px;
+            z-index: 50;
+            border-radius: 6px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: flex;
+        }
+
+        .dropdown-content a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 110px;
+            text-decoration: none;
+            color: #333;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .dropdown-content a img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== CENTERED LOGO + MENU BAR ===== */
+        .site-header,
+        .site-header * {
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+        }
+
+        .site-header {
+            background: #fff;
+        }
+
+        .header-logo-row {
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+        .header-logo-row img {
+            display: block;
+            height: 64px;
+        }
+
+        .header-nav-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 12px 40px;
+            border-top: 1px solid #e8e8e8;
+            border-bottom: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .nav-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 80px;
+        }
+
+        .nav-center > a,
+        .nav-center .dropbtn {
+            text-decoration: none;
+            color: #222;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .nav-center > a:hover,
+        .nav-center .dropbtn:hover {
+            color: #888;
+        }
+
+        .nav-right {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .nav-right input {
+            padding: 10px 16px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+            width: 200px;
+        }
+
+        .nav-right .icon-link {
+            text-decoration: none;
+            color: #222;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1000px) {
+            .nav-center { gap: 36px; }
+            .nav-right input { width: 150px; }
+        }
+
+        @media (max-width: 820px) {
+            .header-nav-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+            .nav-spacer { display: none; }
+            .nav-center { gap: 24px; flex-wrap: wrap; }
+            .nav-right { justify-self: center; flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP OFFER BAR -->
+    <div class="offer-bar">
+        <div class="offer-bar-track">
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <span class="highlight">FREE SHIPPING ON ORDER ABOVE 5000/-</span>
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <!-- duplicate set for seamless loop -->
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+            <span class="highlight">FREE SHIPPING ON ORDER ABOVE 5000/-</span>
+            <span>🎉 EXTRA 10% OFF ON ORDER ABOVE 10,000/-</span>
+        </div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="site-header">
+        <!-- Centered logo -->
+        <div class="header-logo-row">
+            <a href="index.html" class="logo">
+                <img src="images/logo.jpg" alt="Saubhagya Logo" height="64">
+            </a>
+        </div>
+
+        <!-- Menu row: links centered, search + wishlist + cart on the right -->
+        <div class="header-nav-row">
+            <span class="nav-spacer"></span>
+
+            <nav class="nav-center">
+                <a href="index.html">HOME</a>
+
+                <div class="dropdown">
+                    <a href="#" class="dropbtn" onclick="return false;">COLLECTIONS</a>
+                    <div class="dropdown-content">
+                        <a href="frame.html">
+                            <img src="images/frame1.jpg" alt="Resin Frame">
+                            <span>Resin Frame</span>
+                        </a>
+                        <a href="t-light.html">
+                            <img src="images/rtilight.jpg" alt="Resin T-Light">
+                            <span>Resin T-Light</span>
+                        </a>
+                        <a href="jewel.html">
+                            <img src="images/JEWELLARY .jpeg" alt="Resin Jewellery">
+                            <span>Resin Jewellery</span>
+                        </a>
+                        <a href="keychain.html">
+                            <img src="images/keychain.jpg" alt="Resin Keychain">
+                            <span>Resin Keychain</span>
+                        </a>
+                        <a href="customizer.html">
+                            <img src="images/dream.png" alt="Your Dream Customizer">
+                            <span>Your Dream</span>
+                        </a>
+                        <a href="pooja-thali.html">
+                            <img src="images/pooja.jpg" alt="Pooja Thali">
+                            <span>Pooja thali</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="about.html">ABOUT</a>
+                <a href="#" onclick="toggleContactPanel(); return false;">CONTACT</a>
+            </nav>
+
+            <div class="nav-right">
+                <input type="text" id="searchInput" placeholder="Search products...">
+                <a href="#" class="icon-link" id="wlBtn" title="My Wishlist" onclick="openWishlist(); return false;">♡ Wishlist<span id="wlCount">0</span></a>
+                <a href="cart.html" class="icon-link">🛒 Cart<span id="cartCount">0</span></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Title & Navigation -->
+    <div class="page-header">
+        <a href="index.html" class="back-link">&larr; Back to Home</a>
+        <h1 class="page-title">Resin Wall Clocks Collection</h1>
+        <p>Explore our handcrafted resin wall clocks designed to elevate your home decor.</p>
+    </div>
+
+    <!-- Product Grid Section -->
+    <section class="products" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; padding: 0 50px 50px 50px;">
+        
+        <!-- Product 1 -->
+        <div class="product-card"
+             data-id="ocean-wave-clock"
+             data-name="OCEAN WAVE CLOCK"
+             data-price="1899"
+             data-img="images/ocean.jpg">
+            <button type="button" class="wl-btn" aria-label="Add to wishlist" title="Add to wishlist">♡</button>
+            <img src="images/ocean.jpg" alt="Ocean Wave Resin Clock">
+            <h3>OCEAN WAVE CLOCK</h3>
+            <p class="description">12-inch handcrafted ocean wave resin clock with real sand & gold line details.</p>
+            <p class="price">₹1,899</p>
+            <button class="add-cart-btn">Add to Cart</button>
+        </div>
+
+        <!-- Product 2 -->
+        <div class="product-card"
+             data-id="geode-agate-clock"
+             data-name="GEODE AGATE CLOCK"
+             data-price="2299"
+             data-img="images/clock2.jpg">
+            <button type="button" class="wl-btn" aria-label="Add to wishlist" title="Add to wishlist">♡</button>
+            <img src="images/clock2.jpg" alt="Geode Agate Resin Clock">
+            <h3>GEODE AGATE CLOCK</h3>
+            <p class="description">Luxury crystal geode resin clock embedded with crushed glass accents.</p>
+            <p class="price">₹2,299</p>
+            <button class="add-cart-btn">Add to Cart</button>
+        </div>
+
+        <!-- Product 3 -->
+        <div class="product-card"
+             data-id="marble-texture-clock"
+             data-name="MARBLE TEXTURE CLOCK"
+             data-price="1650"
+             data-img="images/clock3.jpg">
+            <button type="button" class="wl-btn" aria-label="Add to wishlist" title="Add to wishlist">♡</button>
+            <img src="images/clock3.jpg" alt="Marble Texture Resin Clock">
+            <h3>MARBLE TEXTURE CLOCK</h3>
+            <p class="description">Elegant white and gold metallic marble effect resin wall clock.</p>
+            <p class="price">₹1,650</p>
+            <button class="add-cart-btn">Add to Cart</button>
+        </div>
+
+        <!-- Product 4 -->
+        <div class="product-card"
+             data-id="black-gold-clock"
+             data-name="BLACK & GOLD CLOCK"
+             data-price="1999"
+             data-img="images/clock4.jpg">
+            <button type="button" class="wl-btn" aria-label="Add to wishlist" title="Add to wishlist">♡</button>
+            <img src="images/clock4.jpg" alt="Black & Gold Resin Clock">
+            <h3>BLACK & GOLD CLOCK</h3>
+            <p class="description">Modern high-gloss deep black resin clock with Roman numeral markers.</p>
+            <p class="price">₹1,999</p>
+            <button class="add-cart-btn">Add to Cart</button>
+        </div>
+
+    </section>
+
+    <div id="cartToast"></div>
+
+    <!-- WISHLIST WINDOW -->
+    <div class="wl-overlay" id="wlOverlay">
+        <div class="wl-modal">
+            <div class="wl-head">
+                <h3>♥ My Wishlist</h3>
+                <button type="button" id="wlClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="wl-list" id="wlList"></div>
+            <div class="wl-foot">
+                <button type="button" class="wl-clear" id="wlClear">Clear all</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING CONTACT PANEL (bottom-right, toggled by CONTACT) -->
+    <div class="contact-panel" id="contactPanel">
+        <div class="contact-panel-details">
+            <span>📞 9175171659</span>
+            <span>✉️ saubhagya2in@gmail.com</span>
+        </div>
+        <a href="https://wa.me/919175171659" target="_blank" class="whatsapp-fab" title="Chat on WhatsApp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="#fff">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12.004 2C6.486 2 2 6.486 2 12.004c0 1.98.573 3.828 1.56 5.398L2 22l4.72-1.539A9.945 9.945 0 0 0 12.004 22C17.522 22 22 17.514 22 12.004 22 6.486 17.522 2 12.004 2zm0 18.017a8.01 8.01 0 0 1-4.09-1.117l-.293-.174-2.803.914.923-2.738-.19-.28a8.005 8.005 0 0 1-1.24-4.618c0-4.42 3.596-8.016 8.017-8.016 4.42 0 8.017 3.596 8.017 8.016 0 4.42-3.596 8.013-8.017 8.013z"/>
+            </svg>
+        </a>
+    </div>
+
+    <script>
+        function toggleContactPanel() {
+            document.getElementById('contactPanel').classList.toggle('open');
+        }
+
+        const CART_KEY = 'saubhagyaCart';
+
+        function getCart() {
+            try {
+                return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function updateCartCount() {
+            const cart = getCart();
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('cartCount');
+            if (totalQty > 0) {
+                badge.textContent = totalQty;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('cartToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        function addToCart(product, btn) {
+            const cart = getCart();
+            const existing = cart.find(item => item.id === product.id);
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id: product.id, name: product.name, price: product.price, img: product.img, qty: 1 });
+            }
+
+            saveCart(cart);
+            updateCartCount();
+            showToast(`${product.name} added to cart`);
+
+            // Brief visual feedback on the button itself (only when a button was clicked)
+            if (btn) {
+                const originalText = btn.textContent;
+                btn.textContent = 'Added ✓';
+                btn.classList.add('added');
+                btn.disabled = true;
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('added');
+                    btn.disabled = false;
+                }, 1000);
+            }
+        }
+
+        document.querySelectorAll('.add-cart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.product-card');
+                const product = {
+                    id: card.dataset.id,
+                    name: card.dataset.name,
+                    price: Number(card.dataset.price),
+                    img: card.dataset.img
+                };
+                addToCart(product, btn);
+            });
+        });
+
+        /* ---------- WISHLIST ---------- */
+        /* Saved in the visitor's browser under one key, so the same wishlist can be used on every page. */
+        const WL_KEY = 'saubhagyaWishlist';
+        const PAGE = location.pathname.split('/').pop() || 'index.html';
+
+        function getWL() {
+            try {
+                return JSON.parse(localStorage.getItem(WL_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveWL(list) {
+            try {
+                localStorage.setItem(WL_KEY, JSON.stringify(list));
+            } catch (e) {}
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function renderWL() {
+            const list = getWL();
+            const ids = list.map(x => x.id);
+
+            // hearts on this page
+            document.querySelectorAll('.product-card').forEach(card => {
+                const b = card.querySelector('.wl-btn');
+                if (!b) return;
+                const on = ids.includes(card.dataset.id);
+                b.classList.toggle('on', on);
+                b.textContent = on ? '♥' : '♡';
+                b.setAttribute('aria-label', on ? 'Remove from wishlist' : 'Add to wishlist');
+                b.title = on ? 'Remove from wishlist' : 'Add to wishlist';
+            });
+
+            // header count
+            const badge = document.getElementById('wlCount');
+            badge.textContent = list.length;
+            badge.style.display = list.length ? 'inline-block' : 'none';
+
+            // wishlist window
+            document.getElementById('wlClear').style.display = list.length ? '' : 'none';
+            document.getElementById('wlList').innerHTML = list.length
+                ? list.map(x => `
+                    <div class="wl-item">
+                        <img src="${esc(x.img)}" alt="">
+                        <div class="wl-info"><b>${esc(x.name)}</b><span>₹${Number(x.price).toLocaleString('en-IN')}</span></div>
+                        <button type="button" class="wl-add" data-add="${esc(x.id)}">Add to Cart</button>
+                        <button type="button" class="wl-rm" data-rm="${esc(x.id)}" aria-label="Remove">&times;</button>
+                    </div>`).join('')
+                : '<div class="wl-empty">Your wishlist is empty.<br>Tap the ♡ on any product to save it here.</div>';
+        }
+
+        function openWishlist() {
+            renderWL();
+            document.getElementById('wlOverlay').classList.add('open');
+        }
+
+        function closeWishlist() {
+            document.getElementById('wlOverlay').classList.remove('open');
+        }
+
+        // heart buttons
+        document.querySelectorAll('.wl-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                const card = b.closest('.product-card');
+                const list = getWL();
+                const i = list.findIndex(x => x.id === card.dataset.id);
+                if (i > -1) {
+                    list.splice(i, 1);
+                    showToast('Removed from wishlist');
+                } else {
+                    list.push({
+                        id: card.dataset.id,
+                        name: card.dataset.name,
+                        price: Number(card.dataset.price),
+                        img: card.dataset.img,
+                        href: PAGE
+                    });
+                    showToast(`${card.dataset.name} added to wishlist ♥`);
+                }
+                saveWL(list);
+                renderWL();
+            });
+        });
+
+        // inside the wishlist window: add to cart / remove / clear / close
+        document.getElementById('wlList').addEventListener('click', e => {
+            const add = e.target.closest('[data-add]');
+            const rm = e.target.closest('[data-rm]');
+            if (add) {
+                const item = getWL().find(x => x.id === add.dataset.add);
+                if (item) addToCart(item, null);
+            } else if (rm) {
+                saveWL(getWL().filter(x => x.id !== rm.dataset.rm));
+                renderWL();
+            }
+        });
+        document.getElementById('wlClear').addEventListener('click', () => {
+            if (confirm('Remove all items from your wishlist?')) {
+                saveWL([]);
+                renderWL();
+            }
+        });
+        document.getElementById('wlClose').addEventListener('click', closeWishlist);
+        document.getElementById('wlOverlay').addEventListener('click', e => {
+            if (e.target.id === 'wlOverlay') closeWishlist();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeWishlist();
+        });
+
+        // Initialize on page load
+        updateCartCount();
+        renderWL();
+        
+    </script>
+<script src="live-products.js"></script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Order - Saubhagya Resin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--ink:#1b1b1b;--gold:#f5b400;--blush:#fff3f6;--lilac:#f5eeff;--line:#eadfe6;--green:#1a8a3c;--red:#c62828;--mute:#6b6b6b}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Montserrat',sans-serif;color:var(--ink);background:linear-gradient(135deg,var(--blush),var(--lilac) 60%,#fff6e9);min-height:100vh}
+a{color:inherit}
+.top{background:#000;padding:12px 5vw;display:flex;align-items:center;justify-content:space-between}
+.top img{height:44px;width:auto;border-radius:4px}
+.top a{color:#fff;text-decoration:none;font-size:13px;font-weight:600}
+.top a:hover{color:var(--gold)}
+main{max-width:720px;margin:0 auto;padding:32px 5vw 70px}
+h1{font-size:clamp(1.5rem,4vw,2rem);font-weight:800;margin:0 0 4px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 26px}
+.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:18px}
+.card h2{font-size:1rem;font-weight:700;margin:0 0 14px}
+
+/* order progress: a real sequence, so it is drawn as one */
+.steps{list-style:none;margin:0;padding:0}
+.steps li{position:relative;padding:0 0 18px 34px;font-size:14px;color:var(--mute)}
+.steps li::before{content:'';position:absolute;left:8px;top:18px;bottom:-2px;width:2px;background:var(--line)}
+.steps li:last-child{padding-bottom:0}
+.steps li:last-child::before{display:none}
+.steps li i{position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);background:#fff}
+.steps li b{display:block;font-weight:600;color:var(--mute)}
+.steps li span{display:block;font-size:12.5px;line-height:1.5}
+.steps li.done i{background:var(--green);border-color:var(--green)}
+.steps li.done::before{background:var(--green)}
+.steps li.done b{color:var(--ink)}
+.steps li.now i{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 5px rgba(245,180,0,.25)}
+.steps li.now b{color:var(--ink);font-weight:800}
+.steps li.now span{color:var(--ink)}
+
+.items{width:100%;border-collapse:collapse;font-size:14px}
+.items td{padding:7px 0;vertical-align:top}
+.items td:last-child{text-align:right;white-space:nowrap}
+.items tr.total td{border-top:1px solid var(--line);padding-top:12px;font-weight:800;font-size:16px}
+
+.notice{border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;margin:0 0 14px}
+.notice.info{background:#fff7dc;border:1px solid var(--gold)}
+.notice.ok{background:#e9f7ee;border:1px solid var(--green);color:#14602b}
+.notice.bad{background:#fdecec;border:1px solid var(--red);color:#8f1d1d}
+
+.btn{display:inline-block;background:#000;color:#fff;border:0;border-radius:50px;padding:13px 26px;font:700 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none;transition:background .2s,color .2s}
+.btn:hover{background:var(--gold);color:#000}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{background:#fff;color:#000;border:2px solid #000}
+.btn.ghost:hover{background:var(--gold);border-color:var(--gold)}
+.btn:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.paygrid{display:grid;gap:14px}
+.upi{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+@media(max-width:560px){.upi{grid-template-columns:1fr;justify-items:center;text-align:center}}
+#qr{padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px;line-height:0}
+.upiid{font-weight:700;word-break:break-all}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+input[type=text]{width:100%;padding:11px 12px;border:1px solid #cfc3cb;border-radius:10px;font:500 15px 'Montserrat',sans-serif;letter-spacing:1px}
+.hint{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.5}
+
+.olist a.row{display:flex;justify-content:space-between;gap:10px;align-items:center;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.olist a.row:last-child{border-bottom:0}
+.olist a.row:hover b{color:#8a6200}
+.pill{font-size:12px;font-weight:600;background:#fff7dc;border:1px solid var(--gold);border-radius:50px;padding:3px 10px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a href="index.html"><img src="images/logo.jpg" alt="Saubhagya"></a>
+  <a href="index.html">Back to shop</a>
+</div>
+
+<main id="app" aria-live="polite">
+  <p class="sub">Loading your order...</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var FLOW = [
+    ["Pending Confirmation", "We have your order. We will confirm the details with you on WhatsApp."],
+    ["Customization Confirmed", "Your design and details are final."],
+    ["Payment Pending", "Pay securely below to start making your piece."],
+    ["Payment Received", "Payment done. Thank you!"],
+    ["In Production", "Your piece is being handcrafted."],
+    ["Ready for Delivery", "Packed and ready to ship."],
+    ["Delivered", "Delivered to you."]
+  ];
+
+  var app = document.getElementById("app");
+  var orderId = new URLSearchParams(location.search).get("order");
+  var order = null, cfg = {};
+
+  /* ---------- helpers ---------- */
+  function esc(v) {
+    return String(v === undefined || v === null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+  function rupee(n) { return "₹" + Number(n || 0).toLocaleString("en-IN"); }
+
+  // finds the login token saved by login.html (looks for anything shaped like a JWT)
+  function getToken() {
+    var stores = [localStorage, sessionStorage];
+    for (var s = 0; s < stores.length; s++) {
+      for (var i = 0; i < stores[s].length; i++) {
+        var v = stores[s].getItem(stores[s].key(i)) || "";
+        if (/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(v)) return v;
+        try {
+          var o = JSON.parse(v);
+          if (o && typeof o.token === "string" && /^eyJ/.test(o.token)) return o.token;
+        } catch (e) {}
+      }
+    }
+    return "";
+  }
+
+  async function api(path, opt) {
+    opt = opt || {};
+    var h = { "Accept": "application/json" };
+    if (opt.body) h["Content-Type"] = "application/json";
+    var t = getToken();
+    if (t) h.Authorization = "Bearer " + t;
+    var r = await fetch(path, {
+      method: opt.method || "GET", headers: h,
+      body: opt.body ? JSON.stringify(opt.body) : undefined
+    });
+    var d = await r.json().catch(function () { return {}; });
+    if (r.status === 401) { var e = new Error("Please log in to see your order."); e.auth = true; throw e; }
+    if (!r.ok) throw new Error(d.error || "Something went wrong. Please try again.");
+    return d;
+  }
+
+  function say(kind, text) {
+    var box = document.getElementById("msg");
+    if (box) box.innerHTML = text ? '<div class="notice ' + kind + '" role="status">' + esc(text) + "</div>" : "";
+  }
+
+  function needLogin() {
+    app.innerHTML =
+      '<h1>Log in to continue</h1><p class="sub">Please log in with the email you used to place your order.</p>' +
+      '<a class="btn" href="login.html">Log in</a>';
+  }
+
+  /* ---------- my orders list (no ?order= in the link) ---------- */
+  async function showList() {
+    var rows = await api("/api/my/orders");
+    var html = '<h1>My orders</h1><p class="sub">Tap an order to see its progress or to pay.</p><div class="card olist">';
+    if (!rows.length) html += "<p>You have no orders yet.</p>";
+    rows.forEach(function (o) {
+      var names = (o.items || []).map(function (i) { return i.name; }).join(", ");
+      html += '<a class="row" href="pay.html?order=' + encodeURIComponent(o.id) + '"><span><b>Order #' + esc(o.id) +
+        "</b><br><small>" + esc(names.slice(0, 70)) + "</small></span><span><span class=\"pill\">" +
+        esc(o.status) + "</span></span></a>";
+    });
+    app.innerHTML = html + "</div>";
+  }
+
+  /* ---------- one order ---------- */
+  function stepsHTML(status) {
+    if (status === "Cancelled")
+      return '<div class="notice bad">This order was cancelled. Message us on WhatsApp if you have questions.</div>';
+    var at = FLOW.findIndex(function (s) { return s[0] === status; });
+    return '<ol class="steps">' + FLOW.map(function (s, i) {
+      var cls = i < at ? "done" : i === at ? "now" : "";
+      return '<li class="' + cls + '"><i></i><b>' + esc(s[0]) + "</b>" + (i === at ? "<span>" + esc(s[1]) + "</span>" : "") + "</li>";
+    }).join("") + "</ol>";
+  }
+
+  function itemsHTML(o) {
+    var rows = (o.items || []).map(function (i) {
+      return "<tr><td>" + esc(i.name) + " × " + esc(i.qty) + "</td><td>" + rupee(i.price * i.qty) + "</td></tr>";
+    }).join("");
+    rows += "<tr><td>Subtotal</td><td>" + rupee(o.subtotal) + "</td></tr>";
+    if (o.discount) rows += "<tr><td>Coupon discount</td><td>- " + rupee(o.discount) + "</td></tr>";
+    rows += "<tr><td>Delivery</td><td>" + rupee(o.delivery) + "</td></tr>";
+    rows += '<tr class="total"><td>Total</td><td>' + rupee(o.total) + "</td></tr>";
+    return '<table class="items">' + rows + "</table>";
+  }
+
+  function payHTML(o) {
+    if (o.paid) return '<div class="notice ok">Payment received. Thank you!</div>';
+    if (o.awaitingVerification)
+      return '<div class="notice info">We received your payment details and are verifying them. This page will show "Payment Received" once it is confirmed.</div>';
+    if (!o.canPay) {
+      var early = ["Pending Confirmation", "Customization Confirmed", "Payment Pending"];
+      return o.payMessage && early.indexOf(o.status) > -1 ? '<div class="notice info">' + esc(o.payMessage) + "</div>" : "";
+    }
+
+    var html = '<div class="card"><h2>Pay ' + rupee(o.total) + "</h2><div id=\"msg\"></div><div class=\"paygrid\">";
+    if (cfg.upi) {
+      html +=
+        '<div class="upi"><div id="qr" aria-label="UPI QR code"></div><div>' +
+        '<p style="margin:0 0 6px">Scan with any UPI app, or pay to:</p>' +
+        '<p class="upiid" style="margin:0 0 10px">' + esc(cfg.upiId) + "</p>" +
+        '<a class="btn ghost" href="' + esc(o.upiLink) + '">Open UPI app</a>' +
+        '<p class="hint">Amount: ' + rupee(o.total) + ". Please pay the exact amount.</p></div></div>" +
+        '<div><label for="utr">UPI reference number (UTR)</label>' +
+        '<input type="text" id="utr" inputmode="numeric" maxlength="12" placeholder="12-digit number" autocomplete="off">' +
+        '<p class="hint">After paying, find this 12-digit number in your payment app under transaction details.</p>' +
+        '<p style="margin:14px 0 0"><button class="btn" id="payUpi" type="button">Submit payment details</button></p></div>';
+    } else {
+      html += '<div class="notice info">Online payment is not set up yet. Please pay as agreed on WhatsApp.</div>';
+    }
+    return html + "</div></div>";
+  }
+
+  async function showOrder() {
+    order = await api("/api/my/orders/" + encodeURIComponent(orderId));
+    app.innerHTML =
+      "<h1>Order #" + esc(order.id) + "</h1>" +
+      '<p class="sub">Placed on ' + esc(new Date(String(order.created_at).replace(" ", "T") + "Z").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })) + "</p>" +
+      '<div class="card"><h2>Order progress</h2>' + stepsHTML(order.status) + "</div>" +
+      payHTML(order) +
+      '<div class="card"><h2>Your items</h2>' + itemsHTML(order) + "</div>" +
+      '<p><a class="btn ghost" href="pay.html">All my orders</a></p>';
+
+    var qr = document.getElementById("qr");
+    if (qr && window.QRCode && order.upiLink) new QRCode(qr, { text: order.upiLink, width: 170, height: 170 });
+
+    var b2 = document.getElementById("payUpi");
+    if (b2) b2.addEventListener("click", payUpi);
+  }
+
+  /* ---------- payments ---------- */
+  async function payUpi() {
+    var btn = document.getElementById("payUpi");
+    var utr = (document.getElementById("utr").value || "").replace(/\s/g, "");
+    if (!/^\d{12}$/.test(utr)) { say("bad", "Enter the 12-digit UPI reference number (UTR)."); return; }
+    btn.disabled = true; say("", "");
+    try {
+      await api("/api/orders/" + encodeURIComponent(orderId) + "/pay/upi", { method: "POST", body: { utr: utr } });
+      await showOrder();
+    } catch (e) { btn.disabled = false; say("bad", e.message); }
+  }
+
+  /* ---------- start ---------- */
+  (async function init() {
+    try {
+      cfg = await fetch("/api/payment/config").then(function (r) { return r.json(); }).catch(function () { return {}; });
+      if (orderId) await showOrder(); else await showList();
+    } catch (e) {
+      if (e.auth) needLogin();
+      else app.innerHTML = '<h1>Something went wrong</h1><p class="sub">' + esc(e.message) + '</p><a class="btn ghost" href="pay.html">Try again</a>';
+    }
+  })();
+})();
+</script>
+</body>
+</html>
